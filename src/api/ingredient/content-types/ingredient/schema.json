@@ -1,10 +1,10 @@
 {
   "kind": "collectionType",
-  "collectionName": "products",
+  "collectionName": "ingredients",
   "info": {
-    "singularName": "product",
-    "pluralName": "products",
-    "displayName": "Product",
+    "singularName": "ingredient",
+    "pluralName": "ingredients",
+    "displayName": "Ingredient",
     "description": ""
   },
   "options": {
@@ -16,17 +16,17 @@
     }
   },
   "attributes": {
-    "title": {
+    "description": {
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
       },
-      "type": "string"
+      "type": "text"
     },
-    "images": {
+    "image": {
       "type": "media",
-      "multiple": true,
+      "multiple": false,
       "required": false,
       "allowedTypes": [
         "images",
@@ -40,7 +40,7 @@
         }
       }
     },
-    "category": {
+    "title": {
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -48,33 +48,13 @@
       },
       "type": "string"
     },
-    "description": {
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      },
-      "type": "text"
-    },
-    "courses": {
-      "type": "relation",
-      "relation": "manyToMany",
-      "target": "api::course.course",
-      "inversedBy": "products"
-    },
-    "subcategory": {
+    "subtitle": {
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
       },
       "type": "string"
-    },
-    "formulas": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::formula.formula",
-      "mappedBy": "product"
     }
   }
 }

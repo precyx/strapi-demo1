@@ -1,10 +1,10 @@
 {
   "kind": "collectionType",
-  "collectionName": "products",
+  "collectionName": "videos",
   "info": {
-    "singularName": "product",
-    "pluralName": "products",
-    "displayName": "Product",
+    "singularName": "video",
+    "pluralName": "videos",
+    "displayName": "Video",
     "description": ""
   },
   "options": {
@@ -16,17 +16,9 @@
     }
   },
   "attributes": {
-    "title": {
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      },
-      "type": "string"
-    },
-    "images": {
+    "video": {
       "type": "media",
-      "multiple": true,
+      "multiple": false,
       "required": false,
       "allowedTypes": [
         "images",
@@ -40,13 +32,19 @@
         }
       }
     },
-    "category": {
+    "title": {
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
       },
       "type": "string"
+    },
+    "courses": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::course.course",
+      "inversedBy": "videos"
     },
     "description": {
       "pluginOptions": {
@@ -54,27 +52,15 @@
           "localized": true
         }
       },
-      "type": "text"
+      "type": "blocks"
     },
-    "courses": {
-      "type": "relation",
-      "relation": "manyToMany",
-      "target": "api::course.course",
-      "inversedBy": "products"
-    },
-    "subcategory": {
+    "lessonNumber": {
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
       },
       "type": "string"
-    },
-    "formulas": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::formula.formula",
-      "mappedBy": "product"
     }
   }
 }

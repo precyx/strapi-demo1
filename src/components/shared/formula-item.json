@@ -1,0 +1,33 @@
+{
+  "collectionName": "components_shared_formula_items",
+  "info": {
+    "displayName": "FormulaItem",
+    "icon": "feather",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "percentage": {
+      "type": "string"
+    },
+    "value": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "image": {
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ],
+      "type": "media",
+      "multiple": false
+    }
+  }
+}

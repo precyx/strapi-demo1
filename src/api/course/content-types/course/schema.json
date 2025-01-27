@@ -21,23 +21,15 @@
       "targetField": "title",
       "required": true
     },
-    "Description": {
+    "description": {
       "type": "blocks",
       "required": true
     },
-    "Price": {
+    "price": {
       "type": "decimal",
       "required": true
     },
-    "publicContent": {
-      "type": "json",
-      "required": true
-    },
-    "fullContent": {
-      "type": "json",
-      "required": true
-    },
-    "Category": {
+    "category": {
       "type": "string"
     },
     "users_permissions_users": {
@@ -50,6 +42,23 @@
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::product.product",
+      "mappedBy": "courses"
+    },
+    "videoPreview": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "videos": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::video.video",
       "mappedBy": "courses"
     }
   }

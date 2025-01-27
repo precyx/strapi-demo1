@@ -1,5 +1,21 @@
 import type { Schema, Struct } from '@strapi/strapi';
 
+export interface SharedFormulaItem extends Struct.ComponentSchema {
+  collectionName: 'components_shared_formula_items';
+  info: {
+    description: '';
+    displayName: 'FormulaItem';
+    icon: 'feather';
+  };
+  attributes: {
+    category: Schema.Attribute.String;
+    image: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
+    percentage: Schema.Attribute.String;
+    title: Schema.Attribute.String;
+    value: Schema.Attribute.String;
+  };
+}
+
 export interface SharedMedia extends Struct.ComponentSchema {
   collectionName: 'components_shared_media';
   info: {
@@ -62,14 +78,25 @@ export interface SharedSlider extends Struct.ComponentSchema {
   };
 }
 
+export interface SharedVideos extends Struct.ComponentSchema {
+  collectionName: 'components_shared_videos';
+  info: {
+    displayName: 'videos';
+    icon: 'play';
+  };
+  attributes: {};
+}
+
 declare module '@strapi/strapi' {
   export module Public {
     export interface ComponentSchemas {
+      'shared.formula-item': SharedFormulaItem;
       'shared.media': SharedMedia;
       'shared.quote': SharedQuote;
       'shared.rich-text': SharedRichText;
       'shared.seo': SharedSeo;
       'shared.slider': SharedSlider;
+      'shared.videos': SharedVideos;
     }
   }
 }
