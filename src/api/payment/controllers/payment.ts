@@ -1,19 +1,20 @@
 module.exports = {
   async createOrder(ctx) {
-    const { amount } = ctx.request.body;
+    const { ids } = ctx.request.body;
 
     console.log("data", ctx.request.body);
+    debugger;
 
     try {
       const order = await strapi
         .service("api::payment.payment")
-        .createOrder(amount);
+        .createOrder(ids);
 
       console.log("order", order);
 
       ctx.send(order);
     } catch (err) {
-      ctx.throw(500, err);
+      return ctx.badRequest(err.message, err.details);
     }
   },
 
@@ -26,7 +27,7 @@ module.exports = {
         .captureOrder(orderId);
       ctx.send(capture);
     } catch (err) {
-      ctx.throw(500, err);
+      return ctx.badRequest(err.message, err.details);
     }
   },
 };

@@ -1,60 +1,108 @@
 const axios = require("axios");
 
-const PAYPAL_API = process.env.PAYPAL_API || "https://api-m.sandbox.paypal.com"; // PayPal API URL
+const { errors } = require("@strapi/utils");
+const { ApplicationError } = errors;
+
+const PAYPAL_API = process.env.PAYPAL_API || "https://api-m.sandbox.paypal.com";
 const CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
 const CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
 
 module.exports = {
-  async createOrder(amount) {
+  async getCoursePrices(courseIds) {
+    debugger;
     try {
-      console.log("armount", amount);
-      const auth = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString(
-        "base64"
-      );
-      const response = await axios.post(
-        `${PAYPAL_API}/v2/checkout/orders`,
+      const courses = await strapi.entityService.findMany(
+        "api::course.course",
         {
-          intent: "CAPTURE",
-          purchase_units: [
-            {
-              amount: {
-                currency_code: "USD",
-                value: amount || "1.00",
-              },
-            },
-          ],
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Basic ${auth}`,
-          },
-        }
+          filters: { documentId: { $in: courseIds } },
+          fields: ["id", "price", "documentId"],
+        } as any
       );
-      return response.data;
-    } catch (err) {
-      throw new Error(`Failed to create order: ${err.message}`);
+
+      if (!courses.length) {
+        throw new Error("No valid courses found for the given IDs.");
+      }
+
+      return courses.map((course) => ({
+        id: course.id,
+        price: course.price || 0,
+      }));
+    } catch (error) {
+      strapi.log.error("Error fetching course prices:", error);
+      throw new Error("Failed to fetch course prices.");
     }
   },
 
-  async captureOrder(orderId) {
-    try {
-      const auth = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString(
-        "base64"
-      );
-      const response = await axios.post(
-        `${PAYPAL_API}/v2/checkout/orders/${orderId}/capture`,
-        {},
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Basic ${auth}`,
-          },
-        }
-      );
-      return response.data;
-    } catch (err) {
-      throw new Error(`Failed to capture order: ${err.message}`);
+  async createOrder(courseIds: string[]) {
+    //throw new Error("No course IDs provided.");
+    //throw new ApplicationError("Service ERROR", { foo: "service" });
+
+    if (!courseIds || courseIds.length === 0) {
+      throw new ApplicationError("No course IDs provided.");
     }
+
+    // Fetch course prices directly from Strapi's DB
+    const courses = await this.getCoursePrices(courseIds);
+
+    // Calculate total price
+    const totalAmount = courses
+      .reduce((sum, course) => sum + course.price, 0)
+      .toFixed(2);
+
+    // Construct PayPal purchase units
+    const purchase_units = [
+      {
+        description: `Courses: ${courseIds.join(", ")}`,
+        amount: {
+          currency_code: "USD",
+          value: totalAmount,
+        },
+      },
+    ];
+
+    // Encode authentication for PayPal
+    const auth = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString(
+      "base64"
+    );
+
+    // Create PayPal order
+    const response = await axios.post(
+      `${PAYPAL_API}/v2/checkout/orders`,
+      {
+        intent: "CAPTURE",
+        purchase_units,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Basic ${auth}`,
+        },
+      }
+    );
+
+    return response.data;
+  },
+
+  async captureOrder(orderId) {
+    if (!orderId) {
+      throw new ApplicationError("Order ID is required.");
+    }
+
+    const auth = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString(
+      "base64"
+    );
+
+    const response = await axios.post(
+      `${PAYPAL_API}/v2/checkout/orders/${orderId}/capture`,
+      {},
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Basic ${auth}`,
+        },
+      }
+    );
+
+    return response.data;
   },
 };

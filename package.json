@@ -9,7 +9,8 @@
     "develop": "strapi develop",
     "seed:example": "node ./scripts/seed.js",
     "start": "strapi start",
-    "strapi": "strapi"
+    "strapi": "strapi",
+    "debug": "node --inspect node_modules/.bin/strapi develop"
   },
   "dependencies": {
     "@paypal/checkout-server-sdk": "^1.0.3",
