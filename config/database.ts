@@ -34,11 +34,7 @@ export default ({ env }) => {
       connection: isProduction
         ? {
             // Production Database (Railway)
-            host: env("DATABASE_HOST", "your-production-db-host"),
-            port: env.int("DATABASE_PORT", 5432),
-            database: env("DATABASE_NAME", "your-production-db-name"),
-            user: env("DATABASE_USERNAME", "your-production-db-user"),
-            password: env("DATABASE_PASSWORD", "your-production-db-password"),
+            connection: env("DATABASE_URL", ""),
             ssl: env.bool("DATABASE_SSL", true),
           }
         : {
