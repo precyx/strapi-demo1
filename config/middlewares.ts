@@ -1,4 +1,4 @@
-export default [
+/*export default [
   "strapi::logger",
   "strapi::errors",
   "strapi::security",
@@ -9,16 +9,20 @@ export default [
   "strapi::session",
   "strapi::favicon",
   "strapi::public",
-];
+];*/
 
-/*export default [
+export default [
   "strapi::logger",
   "strapi::errors",
   "strapi::security",
   {
     name: "strapi::cors",
     config: {
-      origin: ["http://localhost:5173"], // Add your frontend origin
+      origin: [
+        "http://localhost:6000",
+        "http://localhost:5173",
+        "https://clean-sveltekit.vercel.app/",
+      ], // Add your frontend origin
       methods: ["GET", "POST", "PUT", "DELETE"], // Ensure POST is allowed
       headers: ["Content-Type", "Authorization"],
       credentials: true,
@@ -30,5 +34,5 @@ export default [
   "strapi::session",
   "strapi::favicon",
   "strapi::public",
+  "global::auth-proxy",
 ];
-*/

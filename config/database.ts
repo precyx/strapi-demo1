@@ -24,7 +24,6 @@ export default ({ env }) => {
             password: env("DATABASE_PASSWORD", "superStrapi$123"),
             ssl: env.bool("DATABASE_SSL", false),
           },
-      /**/
 
       /*
         connectionString: env('DATABASE_URL'),
