@@ -21,7 +21,7 @@ export default [
       origin: [
         "http://localhost:6000",
         "http://localhost:5173",
-        "https://clean-sveltekit.vercel.app/",
+        "https://clean-sveltekit.vercel.app",
       ], // Add your frontend origin
       methods: ["GET", "POST", "PUT", "DELETE"], // Ensure POST is allowed
       headers: ["Content-Type", "Authorization"],
