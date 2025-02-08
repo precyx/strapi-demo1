@@ -2,9 +2,6 @@ module.exports = {
   async createOrder(ctx) {
     const { ids } = ctx.request.body;
 
-    console.log("data", ctx.request.body);
-    debugger;
-
     try {
       const order = await strapi
         .service("api::payment.payment")

@@ -9,34 +9,22 @@ const CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
 
 module.exports = {
   async getCoursePrices(courseIds) {
-    debugger;
-    try {
-      const courses = await strapi.entityService.findMany(
-        "api::course.course",
-        {
-          filters: { documentId: { $in: courseIds } },
-          fields: ["id", "price", "documentId"],
-        } as any
-      );
+    const courses = await strapi.entityService.findMany("api::course.course", {
+      filters: { documentId: { $in: courseIds } },
+      fields: ["id", "price", "documentId"],
+    } as any);
 
-      if (!courses.length) {
-        throw new Error("No valid courses found for the given IDs.");
-      }
-
-      return courses.map((course) => ({
-        id: course.id,
-        price: course.price || 0,
-      }));
-    } catch (error) {
-      strapi.log.error("Error fetching course prices:", error);
-      throw new Error("Failed to fetch course prices.");
+    if (!courses.length) {
+      throw new Error("No valid courses found for the given IDs.");
     }
+
+    return courses.map((course) => ({
+      id: course.id,
+      price: course.price || 0,
+    }));
   },
 
   async createOrder(courseIds: string[]) {
-    //throw new Error("No course IDs provided.");
-    //throw new ApplicationError("Service ERROR", { foo: "service" });
-
     if (!courseIds || courseIds.length === 0) {
       throw new ApplicationError("No course IDs provided.");
     }
@@ -102,7 +90,14 @@ module.exports = {
         },
       }
     );
+    const data = response.data;
 
-    return response.data;
+    // 🔍 Ensure the transaction was actually completed
+    if (data.status !== "COMPLETED") {
+      throw new ApplicationError(`PayPal order capture failed: ${data.status}`);
+    }
+
+    debugger;
+    return data;
   },
 };
