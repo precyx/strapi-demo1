@@ -1,15 +1,11 @@
-/*export default [
-  "strapi::logger",
-  "strapi::errors",
-  "strapi::security",
-  "strapi::cors",
-  "strapi::poweredBy",
-  "strapi::query",
-  "strapi::body",
-  "strapi::session",
-  "strapi::favicon",
-  "strapi::public",
-];*/
+/* dynamic cors origin based on environment */
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(",")
+  : [];
+
+if (process.env.NODE_ENV === "production" && allowedOrigins.length === 0) {
+  throw new Error("CORS_ORIGIN is not set in production!");
+}
 
 export default [
   "strapi::logger",
@@ -18,12 +14,8 @@ export default [
   {
     name: "strapi::cors",
     config: {
-      origin: [
-        "http://localhost:6000",
-        "http://localhost:5173",
-        "https://clean-sveltekit.vercel.app",
-      ], // Add your frontend origin
-      methods: ["GET", "POST", "PUT", "DELETE"], // Ensure POST is allowed
+      origin: allowedOrigins,
+      methods: ["GET", "POST", "PUT", "DELETE"],
       headers: ["Content-Type", "Authorization"],
       credentials: true,
     },
@@ -34,5 +26,5 @@ export default [
   "strapi::session",
   "strapi::favicon",
   "strapi::public",
-  "global::auth-proxy",
+  "global::auth-proxy", // api key injection
 ];
