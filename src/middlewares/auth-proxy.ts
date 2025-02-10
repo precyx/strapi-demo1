@@ -4,6 +4,7 @@ export default () => {
     console.log("🔍 Headers before modification:", ctx.request.headers);
 
     if (ctx.request.url.startsWith("/api/")) {
+      // inject API token
       ctx.request.headers["authorization"] =
         `Bearer ${process.env.STRAPI_API_TOKEN}`;
 
