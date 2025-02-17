@@ -57,7 +57,7 @@ export default [
   "strapi::public",
 
   // Custom Middleware: API Key Injection for Authentication Proxy
-  "global::auth-proxy",
+  //"global::auth-proxy",
 ];
 
 /*

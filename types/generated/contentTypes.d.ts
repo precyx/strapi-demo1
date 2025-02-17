@@ -645,6 +645,41 @@ export interface ApiProductProduct extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiUserCustomUserCustom extends Struct.CollectionTypeSchema {
+  collectionName: 'user_customs';
+  info: {
+    description: '';
+    displayName: 'UserCustom';
+    pluralName: 'user-customs';
+    singularName: 'user-custom';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    blocked: Schema.Attribute.Boolean;
+    confirmed: Schema.Attribute.Boolean;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    email: Schema.Attribute.Email & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::user-custom.user-custom'
+    > &
+      Schema.Attribute.Private;
+    password: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    username: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
 export interface ApiUtensilUtensil extends Struct.CollectionTypeSchema {
   collectionName: 'utensils';
   info: {
@@ -1265,6 +1300,7 @@ declare module '@strapi/strapi' {
       'api::global.global': ApiGlobalGlobal;
       'api::ingredient.ingredient': ApiIngredientIngredient;
       'api::product.product': ApiProductProduct;
+      'api::user-custom.user-custom': ApiUserCustomUserCustom;
       'api::utensil.utensil': ApiUtensilUtensil;
       'api::video.video': ApiVideoVideo;
       'plugin::content-releases.release': PluginContentReleasesRelease;

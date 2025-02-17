@@ -1,0 +1,34 @@
+{
+  "kind": "collectionType",
+  "collectionName": "user_customs",
+  "info": {
+    "singularName": "user-custom",
+    "pluralName": "user-customs",
+    "displayName": "UserCustom",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "username": {
+      "type": "string",
+      "required": true
+    },
+    "email": {
+      "type": "email",
+      "required": true
+    },
+    "confirmed": {
+      "type": "boolean"
+    },
+    "blocked": {
+      "type": "boolean"
+    },
+    "password": {
+      "type": "string",
+      "required": true,
+      "private": true
+    }
+  }
+}

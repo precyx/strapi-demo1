@@ -1,5 +1,7 @@
 module.exports = ({ env }) => ({
-  // ...
+  /**
+   * Cloudflare Upload Plugin
+   */
   upload: {
     config: {
       provider: "strapi-provider-cloudflare-r2",
@@ -33,6 +35,30 @@ module.exports = ({ env }) => ({
         delete: {
           ACL: null, // Ensures proper permissions for deletion
         },
+      },
+    },
+  },
+
+  /**
+   * Email Plugin
+   */
+  /**
+   * Email Plugin
+   */
+  email: {
+    config: {
+      provider: "nodemailer", // Use nodemailer for both dev and prod
+      providerOptions:
+        env("NODE_ENV") === "production"
+          ? {} // Use Strapi's default production email settings
+          : {
+              host: "localhost", // Use MailHog in development
+              port: 1025,
+              ignoreTLS: true,
+            },
+      settings: {
+        defaultFrom: "no-reply@example.com",
+        defaultReplyTo: "support@example.com",
       },
     },
   },
