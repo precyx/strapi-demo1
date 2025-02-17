@@ -59,3 +59,18 @@ export default [
   // Custom Middleware: API Key Injection for Authentication Proxy
   "global::auth-proxy",
 ];
+
+/*
+export default [
+  "strapi::logger",
+  "strapi::errors",
+  "strapi::security",
+  "strapi::cors",
+  "strapi::poweredBy",
+  "strapi::query",
+  "strapi::body",
+  "strapi::session",
+  "strapi::favicon",
+  "strapi::public",
+];
+*/
