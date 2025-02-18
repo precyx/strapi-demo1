@@ -23,20 +23,20 @@ export default factories.createCoreController(
     async register(ctx: Context) {
       const { username, email, password } = ctx.request.body;
 
-      // Check if user already exists
-      const existingUser = await strapi.entityService.findMany(
-        "api::user-custom.user-custom",
-        { filters: { email } }
-      );
+      const existingUser = await strapi
+        .documents("api::user-custom.user-custom")
+        .findMany({
+          filters: { email },
+        });
+
       if (existingUser.length > 0) return ctx.badRequest("User already exists");
 
-      // Create user
-      const user = await strapi.entityService.create(
-        "api::user-custom.user-custom",
-        {
+      // ✅ Create user
+      const user = await strapi
+        .documents("api::user-custom.user-custom")
+        .create({
           data: { username, email, password: password },
-        }
-      );
+        });
 
       // ✅ Generate JWT token for the newly registered user
       const loginToken = generateJWT(user.documentId, user.email, "7d");
@@ -70,10 +70,12 @@ export default factories.createCoreController(
     async login(ctx) {
       const { email, password } = ctx.request.body;
 
-      const user = await strapi.entityService.findMany(
-        "api::user-custom.user-custom",
-        { filters: { email } }
-      );
+      const user = await strapi
+        .documents("api::user-custom.user-custom")
+        .findMany({
+          filters: { email },
+        });
+
       if (user.length === 0)
         return ctx.badRequest("Invalid email or password.");
 

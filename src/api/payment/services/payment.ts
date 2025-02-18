@@ -9,10 +9,10 @@ const CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
 
 module.exports = {
   async getCoursePrices(courseIds) {
-    const courses = await strapi.entityService.findMany("api::course.course", {
+    const courses = await strapi.documents("api::course.course").findMany({
       filters: { documentId: { $in: courseIds } },
-      fields: ["id", "price", "documentId"],
-    } as any);
+      fields: ["id", "price"],
+    });
 
     if (!courses.length) {
       throw new Error("No valid courses found for the given IDs.");
