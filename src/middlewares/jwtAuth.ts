@@ -4,22 +4,23 @@ export default (config, { strapi }) => {
   return async (ctx, next) => {
     try {
       // ✅ Extract token from the request body
-      const token = ctx.request.body?.token;
+      const loginToken = ctx.request.body?.loginToken;
 
-      if (!token) {
+      if (!loginToken) {
         return ctx.unauthorized("No token provided in request body.");
       }
 
       // ✅ Verify the token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET) as {
-        id: string;
+      const decoded = jwt.verify(loginToken, process.env.JWT_SECRET) as {
+        documentId: string;
       };
 
-      // ✅ Attach user ID to request
-      ctx.state.user = await strapi.entityService.findOne(
-        "api::user-custom.user-custom",
-        decoded.id
-      );
+      // ✅ Attach user documentId to request
+      ctx.state.user = await strapi
+        .documents("api::user-custom.user-custom")
+        .findOne({
+          documentId: decoded.documentId,
+        });
 
       if (!ctx.state.user) {
         return ctx.unauthorized("Invalid token");

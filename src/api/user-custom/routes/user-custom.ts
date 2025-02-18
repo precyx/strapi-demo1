@@ -19,6 +19,12 @@ export default {
       config: { middlewares: ["global::jwtAuth"] },
     },
     {
+      method: "POST",
+      path: "/user-custom/confirm-registration",
+      handler: "user-custom.confirmRegistration",
+      config: { policies: [] },
+    },
+    {
       method: "PUT",
       path: "/user-custom/update",
       handler: "user-custom.update",

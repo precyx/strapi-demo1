@@ -9,31 +9,47 @@ const sendEmail = async (
   templateName: string,
   variables: any
 ) => {
-  // Read and compile email template
-  const templatePath = path.join(
-    __dirname,
-    `../templates/${templateName}.html`
-  );
-  const templateSource = fs.readFileSync(templatePath, "utf8");
-  const template = Handlebars.compile(templateSource);
-  const htmlContent = template(variables);
+  try {
+    // ✅ Ensure templates are read from `src/` instead of `dist/`
+    const templatePath = path.join(
+      process.cwd(),
+      "src",
+      "templates",
+      `${templateName}.html`
+    );
 
-  // Configure Nodemailer (MailHog setup for local testing)
-  const transporter = nodemailer.createTransport({
-    host: "localhost",
-    port: 1025, // MailHog default port
-    ignoreTLS: true,
-  });
+    // ✅ Check if the template exists before reading
+    if (!fs.existsSync(templatePath)) {
+      console.error(
+        `❌ Email template "${templateName}.html" not found at ${templatePath}`
+      );
+      throw new Error(`Email template "${templateName}" does not exist.`);
+    }
 
-  // Send email
-  await transporter.sendMail({
-    from: "no-reply@yourdomain.com",
-    to,
-    subject,
-    html: htmlContent,
-  });
+    // ✅ Read and compile the email template
+    const templateSource = fs.readFileSync(templatePath, "utf8");
+    const template = Handlebars.compile(templateSource);
+    const htmlContent = template(variables);
 
-  console.log(`Email sent to ${to}`);
+    // ✅ Configure Nodemailer (MailHog setup)
+    const transporter = nodemailer.createTransport({
+      host: "localhost",
+      port: 1025, // MailHog default port
+      ignoreTLS: true,
+    });
+
+    // ✅ Send the email
+    const info = await transporter.sendMail({
+      from: "no-reply@yourdomain.com",
+      to,
+      subject,
+      html: htmlContent,
+    });
+
+    console.log(`📧 Email sent to ${to}: ${info.messageId}`);
+  } catch (error) {
+    console.error("❌ Email Sending Failed:", error.message);
+  }
 };
 
 export default sendEmail;
