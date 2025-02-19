@@ -29,6 +29,12 @@
       "type": "string",
       "required": true,
       "private": true
+    },
+    "phone": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string"
     }
   }
 }

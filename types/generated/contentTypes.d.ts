@@ -659,6 +659,7 @@ export interface ApiUserCustomUserCustom extends Struct.CollectionTypeSchema {
   attributes: {
     blocked: Schema.Attribute.Boolean;
     confirmed: Schema.Attribute.Boolean;
+    country: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -672,6 +673,7 @@ export interface ApiUserCustomUserCustom extends Struct.CollectionTypeSchema {
     password: Schema.Attribute.String &
       Schema.Attribute.Required &
       Schema.Attribute.Private;
+    phone: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
