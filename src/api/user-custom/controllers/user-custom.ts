@@ -5,39 +5,9 @@ import sendEmail from "../../../services/email";
 import { Context } from "koa";
 import Joi from "joi";
 
-const generateJWT = (documentId, email, days) => {
-  return jwt.sign(
-    { documentId: documentId, email: email },
-    process.env.JWT_SECRET,
-    {
-      expiresIn: days,
-    }
-  );
-};
-
-const userSchema = Joi.object({
-  username: Joi.string().min(3).alphanum().required(),
-  email: Joi.string().email().required(),
-  password: Joi.string().min(3).required(),
-  phone: Joi.string()
-    .pattern(/^\+?[1-9]\d{1,14}$/)
-    .optional(),
-  country: Joi.string().optional(),
-});
-
-// Function to validate user input using the schema
-const validateUserData = (data: {
-  username: string;
-  email: string;
-  password: string;
-  phone: string;
-  country: string;
-}) => {
-  const { error } = userSchema.validate(data);
-  if (error) {
-    throw new Error(error.details[0].message);
-  }
-};
+import { register } from "../services/register";
+import { login } from "../services/login";
+import { confirmRegistration } from "../services/confirmRegistration";
 
 export default factories.createCoreController(
   "api::user-custom.user-custom",
@@ -48,47 +18,13 @@ export default factories.createCoreController(
     async register(ctx: Context) {
       try {
         const { username, email, password, phone, country } = ctx.request.body;
-
-        const existingUser = await strapi
-          .documents("api::user-custom.user-custom")
-          .findMany({
-            filters: { email },
-          });
-
-        if (existingUser.length > 0)
-          return ctx.badRequest("User already exists");
-
-        validateUserData({ username, email, password, phone, country });
-
-        // ✅ Create user
-        const user = await strapi
-          .documents("api::user-custom.user-custom")
-          .create({
-            data: { username, email, password: password, phone, country },
-          });
-
-        // ✅ Generate JWT token for the newly registered user
-        const loginToken = generateJWT(user.documentId, user.email, "7d");
-        // ✅ Generate confirmation token
-        const confirmationToken = generateJWT(
-          user.documentId,
-          user.email,
-          "1d"
-        );
-
-        // ✅ Generate registration link
-        const registrationLink = `${process.env.CORS_ORIGIN}/login/verify-email?token=${confirmationToken}`;
-
-        // ✅ Send email using Handlebars template
-        let to = email;
-        let subject = "Confirm Your Registration";
-        let templateName = "confirm-registration";
-        let variables = {
-          name: username,
-          registrationLink: registrationLink,
-          email: email,
-        };
-        await sendEmail(to, subject, templateName, variables);
+        const { loginToken, user } = await register({
+          username,
+          email,
+          password,
+          phone,
+          country,
+        });
 
         return ctx.send({
           message: "User registered successfully",
@@ -104,32 +40,17 @@ export default factories.createCoreController(
      * Login User
      */
     async login(ctx) {
-      const { email, password } = ctx.request.body;
+      try {
+        const { email, password } = ctx.request.body;
+        const { loginToken, user } = await login({ email, password });
 
-      const user = await strapi
-        .documents("api::user-custom.user-custom")
-        .findMany({
-          filters: { email },
+        return ctx.send({
+          loginToken,
+          user,
         });
-
-      if (user.length === 0)
-        return ctx.badRequest("Invalid email or password.");
-
-      // Check password
-      const validPassword = await bcrypt.compare(password, user[0].password);
-      if (!validPassword) return ctx.badRequest("Invalid email or password");
-
-      // Generate JWT token
-      const loginToken = generateJWT(user[0].documentId, user[0].email, "7d");
-
-      return ctx.send({
-        loginToken,
-        user: {
-          documentId: user[0].documentId,
-          username: user[0].username,
-          email: user[0].email,
-        },
-      });
+      } catch (error) {
+        return ctx.badRequest(error.message);
+      }
     },
 
     /**
@@ -140,7 +61,6 @@ export default factories.createCoreController(
       if (!ctx.state.user) {
         return ctx.unauthorized("You are not logged in.");
       }
-
       return ctx.send(ctx.state.user);
     },
 
@@ -148,31 +68,19 @@ export default factories.createCoreController(
      * Confirm Registration
      */
     async confirmRegistration(ctx) {
-      const { confirmToken } = ctx.request.body;
-
       try {
-        // ✅ Decode the token
-        const decoded = jwt.verify(confirmToken, process.env.JWT_SECRET) as {
-          documentId: string;
-          email: string;
-        };
+        const { confirmToken } = ctx.request.body;
+        const { email, confirmed, message } =
+          await confirmRegistration(confirmToken);
 
-        console.log("🏀 CONFIRM REGISTRATION - decoded token", decoded);
-        console.log("--");
-
-        // ✅ Find user by documentId and update `confirmed`
-        strapi.documents("api::user-custom.user-custom").update({
-          documentId: decoded.documentId,
-          data: { confirmed: true },
-        });
-
+        // Send the successful response
         return ctx.send({
-          email: decoded.email,
-          confirmed: true,
-          message: "Email successfully verified!",
+          email,
+          confirmed,
+          message,
         });
       } catch (error) {
-        return ctx.badRequest("Invalid or expired token.");
+        return ctx.badRequest(error.message);
       }
     },
 
