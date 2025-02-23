@@ -1,9 +1,5 @@
 import { factories } from "@strapi/strapi";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import sendEmail from "../../../services/email";
 import { Context } from "koa";
-import Joi from "joi";
 
 import { register } from "../services/register";
 import { login } from "../services/login";

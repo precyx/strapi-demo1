@@ -1,5 +1,7 @@
+import { Context } from "koa";
+
 module.exports = {
-  async createOrder(ctx) {
+  async createOrder(ctx: Context) {
     const { ids } = ctx.request.body;
 
     try {
@@ -11,11 +13,12 @@ module.exports = {
 
       ctx.send(order);
     } catch (err) {
-      return ctx.badRequest(err.message, err.details);
+      // console.log("🚨 CREATE ORDER ERROR", err.response);
+      return (ctx as any).badRequest(err.message, err.response.data);
     }
   },
 
-  async captureOrder(ctx) {
+  async captureOrder(ctx: Context) {
     const { orderId } = ctx.request.body;
 
     try {
@@ -24,7 +27,7 @@ module.exports = {
         .captureOrder(orderId);
       ctx.send(capture);
     } catch (err) {
-      return ctx.badRequest(err.message, err.details);
+      return (ctx as any).badRequest(err.message, err.response.data);
     }
   },
 };

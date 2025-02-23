@@ -21,23 +21,27 @@ module.exports = {
     return courses.map((course) => ({
       id: course.id,
       price: course.price || 0,
+      documentId: course.documentId,
     }));
   },
 
+  /**
+   * Create Order
+   */
   async createOrder(courseIds: string[]) {
     if (!courseIds || courseIds.length === 0) {
       throw new ApplicationError("No course IDs provided.");
     }
 
-    // Fetch course prices directly from Strapi's DB
+    // ✅ get course prices
     const courses = await this.getCoursePrices(courseIds);
 
-    // Calculate total price
+    console.log("🐸 CREATE ORDER - courses", courses);
+
     const totalAmount = courses
       .reduce((sum, course) => sum + course.price, 0)
       .toFixed(2);
 
-    // Construct PayPal purchase units
     const purchase_units = [
       {
         description: `Courses: ${courseIds.join(", ")}`,
@@ -48,12 +52,12 @@ module.exports = {
       },
     ];
 
-    // Encode authentication for PayPal
+    // ✅ encode authentication for paypal
     const auth = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString(
       "base64"
     );
 
-    // Create PayPal order
+    // ✅ create paypal order
     const response = await axios.post(
       `${PAYPAL_API}/v2/checkout/orders`,
       {
@@ -71,15 +75,20 @@ module.exports = {
     return response.data;
   },
 
+  /**
+   * Capture Order
+   */
   async captureOrder(orderId) {
     if (!orderId) {
       throw new ApplicationError("Order ID is required.");
     }
 
+    // ✅ encode authentication for paypal
     const auth = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString(
       "base64"
     );
 
+    // ✅ capture paypal order
     const response = await axios.post(
       `${PAYPAL_API}/v2/checkout/orders/${orderId}/capture`,
       {},
@@ -92,12 +101,11 @@ module.exports = {
     );
     const data = response.data;
 
-    // 🔍 Ensure the transaction was actually completed
+    // ✅ create paypal order
     if (data.status !== "COMPLETED") {
       throw new ApplicationError(`PayPal order capture failed: ${data.status}`);
     }
 
-    debugger;
     return data;
   },
 };

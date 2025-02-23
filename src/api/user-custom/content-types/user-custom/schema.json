@@ -41,6 +41,12 @@
       "relation": "manyToMany",
       "target": "api::course.course",
       "mappedBy": "user_customs"
+    },
+    "cart": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::cart.cart",
+      "mappedBy": "user"
     }
   }
 }

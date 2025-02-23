@@ -397,6 +397,33 @@ export interface ApiAboutAbout extends Struct.SingleTypeSchema {
   };
 }
 
+export interface ApiCartCart extends Struct.CollectionTypeSchema {
+  collectionName: 'carts';
+  info: {
+    description: '';
+    displayName: 'Cart';
+    pluralName: 'carts';
+    singularName: 'cart';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    courses: Schema.Attribute.Relation<'oneToMany', 'api::course.course'>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::cart.cart'> &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    user: Schema.Attribute.Relation<'oneToOne', 'api::user-custom.user-custom'>;
+  };
+}
+
 export interface ApiCourseCourse extends Struct.CollectionTypeSchema {
   collectionName: 'courses';
   info: {
@@ -662,6 +689,7 @@ export interface ApiUserCustomUserCustom extends Struct.CollectionTypeSchema {
   };
   attributes: {
     blocked: Schema.Attribute.Boolean;
+    cart: Schema.Attribute.Relation<'oneToOne', 'api::cart.cart'>;
     confirmed: Schema.Attribute.Boolean;
     country: Schema.Attribute.String;
     courses: Schema.Attribute.Relation<'manyToMany', 'api::course.course'>;
@@ -1302,6 +1330,7 @@ declare module '@strapi/strapi' {
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
       'api::about.about': ApiAboutAbout;
+      'api::cart.cart': ApiCartCart;
       'api::course.course': ApiCourseCourse;
       'api::formula.formula': ApiFormulaFormula;
       'api::global.global': ApiGlobalGlobal;
