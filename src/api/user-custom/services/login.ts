@@ -19,22 +19,25 @@ const generateJWT = (documentId, email, days) => {
  * Login
  */
 export const login = async ({ email, password }) => {
-  const user = await strapi.documents("api::user-custom.user-custom").findMany({
-    filters: { email },
-  });
+  // ✅ get user
+  const user = await strapi
+    .documents("api::user-custom.user-custom")
+    .findFirst({
+      filters: { email },
+    });
 
-  if (user.length === 0) {
+  if (!user) {
     throw new Error("Invalid email or password.");
   }
 
-  // Check password
-  const validPassword = await bcrypt.compare(password, user[0].password);
+  // ✅ check pw
+  const validPassword = await bcrypt.compare(password, user.password);
   if (!validPassword) {
     throw new Error("Invalid email or password.");
   }
 
-  // Generate JWT token
-  const loginToken = generateJWT(user[0].documentId, user[0].email, "7d");
+  // ✅ generate jwt
+  const loginToken = generateJWT(user.documentId, user.email, "7d");
 
-  return { loginToken, user: user[0] };
+  return { loginToken, user: user };
 };

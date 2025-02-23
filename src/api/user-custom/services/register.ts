@@ -47,6 +47,7 @@ export const register = async ({
   phone,
   country,
 }) => {
+  // ✅ check if user already exists
   const existingUser = await strapi
     .documents("api::user-custom.user-custom")
     .findMany({
@@ -57,20 +58,19 @@ export const register = async ({
 
   validateUserData({ username, email, password, phone, country });
 
-  // ✅ Create user
+  // ✅ create user
   const user = await strapi.documents("api::user-custom.user-custom").create({
     data: { username, email, password: password, phone, country },
   });
 
-  // ✅ Generate JWT token for the newly registered user
+  // ✅ generate jwt
   const loginToken = generateJWT(user.documentId, user.email, "7d");
-  // ✅ Generate confirmation token
+  // ✅ generate confirmation token
   const confirmationToken = generateJWT(user.documentId, user.email, "1d");
-
-  // ✅ Generate registration link
+  // ✅ generate registration linke
   const registrationLink = `${process.env.CORS_ORIGIN}/login/verify-email?token=${confirmationToken}`;
 
-  // ✅ Send email using Handlebars template
+  // ✅ send email
   let to = email;
   let subject = "Confirm Your Registration";
   let templateName = "confirm-registration";
@@ -81,6 +81,5 @@ export const register = async ({
   };
   await sendEmail(to, subject, templateName, variables);
 
-  // return
   return { loginToken, user };
 };
