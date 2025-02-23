@@ -60,6 +60,12 @@
       "relation": "manyToMany",
       "target": "api::video.video",
       "mappedBy": "courses"
+    },
+    "user_customs": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::user-custom.user-custom",
+      "inversedBy": "courses"
     }
   }
 }

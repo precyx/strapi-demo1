@@ -428,6 +428,10 @@ export interface ApiCourseCourse extends Struct.CollectionTypeSchema {
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    user_customs: Schema.Attribute.Relation<
+      'manyToMany',
+      'api::user-custom.user-custom'
+    >;
     users_permissions_users: Schema.Attribute.Relation<
       'manyToMany',
       'plugin::users-permissions.user'
@@ -660,6 +664,7 @@ export interface ApiUserCustomUserCustom extends Struct.CollectionTypeSchema {
     blocked: Schema.Attribute.Boolean;
     confirmed: Schema.Attribute.Boolean;
     country: Schema.Attribute.String;
+    courses: Schema.Attribute.Relation<'manyToMany', 'api::course.course'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

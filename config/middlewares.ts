@@ -44,7 +44,7 @@ export default [
     config: {
       origin: allowedOrigins,
       methods: ["GET", "POST", "PUT", "DELETE"],
-      headers: ["Content-Type", "Authorization"],
+      headers: ["Content-Type", "Authorization", "User-Authorization"],
       credentials: true,
     },
   },

@@ -13,7 +13,7 @@ export default {
       config: { policies: [] },
     },
     {
-      method: "POST",
+      method: "GET",
       path: "/user-custom/me",
       handler: "user-custom.me",
       config: { middlewares: ["global::jwtAuth"] },
