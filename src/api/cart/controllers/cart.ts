@@ -25,7 +25,7 @@ export default factories.createCoreController(
           return ctx.notFound("Cart not found for this user.");
         }*/
 
-        ctx.send(cart);
+        ctx.send(cart || { courses: [] });
       } catch (err) {
         ctx.throw(500, "Error fetching the cart.");
       }
