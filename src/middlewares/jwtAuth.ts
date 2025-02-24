@@ -24,6 +24,7 @@ export default (config, { strapi: Strapi }) => {
         .documents("api::user-custom.user-custom")
         .findOne({
           documentId: decoded.documentId,
+          populate: "*",
         });
       ctx.state.user = user;
 

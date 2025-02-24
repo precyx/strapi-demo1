@@ -1,7 +1,7 @@
 const axios = require("axios");
 
 const { errors } = require("@strapi/utils");
-const { ApplicationError } = errors;
+const { ApplicationError, UnauthorizedError } = errors;
 
 const PAYPAL_API = process.env.PAYPAL_API || "https://api-m.sandbox.paypal.com";
 const CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
@@ -78,7 +78,11 @@ module.exports = {
   /**
    * Capture Order
    */
-  async captureOrder(orderId) {
+  async captureOrder(user, orderId) {
+    debugger;
+    if (!user) {
+      throw new UnauthorizedError("You are not logged in.");
+    }
     if (!orderId) {
       throw new ApplicationError("Order ID is required.");
     }
@@ -88,8 +92,20 @@ module.exports = {
       "base64"
     );
 
+    // ✅ get cart
+    let cart = await strapi.documents("api::cart.cart").findFirst({
+      filters: { user: { documentId: user.documentId } },
+      populate: "*",
+    });
+
+    if (!cart) {
+      throw new ApplicationError("Cart not found for this user.");
+    }
+
+    let cartCourses = cart.courses.map((course) => course.documentId);
+
     // ✅ capture paypal order
-    const response = await axios.post(
+    const paypalCapture = await axios.post(
       `${PAYPAL_API}/v2/checkout/orders/${orderId}/capture`,
       {},
       {
@@ -99,13 +115,26 @@ module.exports = {
         },
       }
     );
-    const data = response.data;
+    const paypalCaptureData = paypalCapture.data;
 
-    // ✅ create paypal order
-    if (data.status !== "COMPLETED") {
-      throw new ApplicationError(`PayPal order capture failed: ${data.status}`);
+    if (paypalCaptureData.status !== "COMPLETED") {
+      throw new ApplicationError(
+        `PayPal order capture failed: ${paypalCaptureData.status}`
+      );
     }
 
-    return data;
+    // ✅ update user's bought courses
+    const updatedCourses = [...new Set([...user.courses, ...cartCourses])];
+    await strapi.documents("api::user-custom.user-custom").update({
+      documentId: user.documentId,
+      data: { courses: updatedCourses },
+    });
+
+    // ✅ clear cart
+    await strapi.documents("api::cart.cart").delete({
+      documentId: cart.documentId,
+    });
+
+    return paypalCaptureData;
   },
 };

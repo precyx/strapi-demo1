@@ -19,12 +19,13 @@ module.exports = {
   },
 
   async captureOrder(ctx: Context) {
+    let user = ctx.state.user;
     const { orderId } = ctx.request.body;
 
     try {
       const capture = await strapi
         .service("api::payment.payment")
-        .captureOrder(orderId);
+        .captureOrder(user, orderId);
       ctx.send(capture);
     } catch (err) {
       return (ctx as any).badRequest(err.message, err.response.data);

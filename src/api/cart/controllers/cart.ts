@@ -21,9 +21,9 @@ export default factories.createCoreController(
           populate: "*",
         });
 
-        if (!cart) {
+        /*if (!cart) {
           return ctx.notFound("Cart not found for this user.");
-        }
+        }*/
 
         ctx.send(cart);
       } catch (err) {
