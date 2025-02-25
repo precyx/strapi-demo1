@@ -27,8 +27,9 @@ export default factories.createCoreController(
           loginToken,
           user,
         });
-      } catch (error) {
-        return ctx.badRequest(error.message);
+      } catch (err) {
+        console.log("❌ REGISTER USER: ", err);
+        return (ctx as any).badRequest(err.message, err.details);
       }
     },
 
@@ -44,8 +45,9 @@ export default factories.createCoreController(
           loginToken,
           user,
         });
-      } catch (error) {
-        return ctx.badRequest(error.message);
+      } catch (err) {
+        console.log("❌ LOGIN USER: ", err);
+        return (ctx as any).badRequest(err.message, err.details);
       }
     },
 
@@ -55,6 +57,7 @@ export default factories.createCoreController(
     async me(ctx) {
       // ✅ Ensure the user is attached from `jwtAuth`
       if (!ctx.state.user) {
+        console.log("❌ ME USER: ", "You are not logged in.");
         return ctx.unauthorized("You are not logged in.");
       }
       return ctx.send(ctx.state.user);
@@ -66,8 +69,7 @@ export default factories.createCoreController(
     async confirmRegistration(ctx) {
       try {
         const { confirmToken } = ctx.request.body;
-        const { email, confirmed, message } =
-          await confirmRegistration(confirmToken);
+        const { email, confirmed, message } = await confirmRegistration(confirmToken); // prettier-ignore
 
         // Send the successful response
         return ctx.send({
@@ -75,8 +77,9 @@ export default factories.createCoreController(
           confirmed,
           message,
         });
-      } catch (error) {
-        return ctx.badRequest(error.message);
+      } catch (err) {
+        console.log("❌ CONFIRM USER REGISTRATION: ", err);
+        return (ctx as any).badRequest(err.message, err.details);
       }
     },
 

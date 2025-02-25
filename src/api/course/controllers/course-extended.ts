@@ -16,9 +16,7 @@ export default factories.createCoreController(
         let user = ctx.state.user;
         let { populate } = ctx.request.query;
 
-        if (!user) {
-          return ctx.unauthorized("You are not logged in.");
-        }
+        if (!user) return ctx.unauthorized("You are not logged in."); // prettier-ignore
 
         console.log("🦋 User", user);
 
@@ -41,13 +39,10 @@ export default factories.createCoreController(
           },
         };
 
-        return {
-          data: coursesByUser,
-          meta: meta,
-        };
+        return { data: coursesByUser, meta: meta}; // prettier-ignore
       } catch (err) {
-        console.log("err", err);
-        return ctx.badRequest(err.message);
+        console.log("❌ GET MY COURSES: ", err);
+        return (ctx as any).badRequest(err.message, err.details);
       }
     },
   })

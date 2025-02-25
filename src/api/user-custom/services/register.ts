@@ -54,7 +54,7 @@ export const register = async ({
       filters: { email },
     });
 
-  if (existingUser.length > 0) throw new Error("User already exists");
+  if (existingUser.length > 0) throw new Error("User already exists"); // prettier-ignore
 
   validateUserData({ username, email, password, phone, country });
 
@@ -63,11 +63,9 @@ export const register = async ({
     data: { username, email, password: password, phone, country },
   });
 
-  // ✅ generate jwt
+  // ✅ generate login and confirm token, registration link
   const loginToken = generateJWT(user.documentId, user.email, "7d");
-  // ✅ generate confirmation token
   const confirmationToken = generateJWT(user.documentId, user.email, "1d");
-  // ✅ generate registration linke
   const registrationLink = `${process.env.CORS_ORIGIN}/login/verify-email?token=${confirmationToken}`;
 
   // ✅ send email

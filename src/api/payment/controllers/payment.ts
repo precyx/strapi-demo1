@@ -13,8 +13,9 @@ module.exports = {
 
       ctx.send(order);
     } catch (err) {
-      // console.log("🚨 CREATE ORDER ERROR", err.response);
-      return (ctx as any).badRequest(err.message, err.response.data);
+      debugger;
+      console.log("❌ CREATE ORDER: ", err);
+      return (ctx as any).badRequest(err.message, err.details);
     }
   },
 
@@ -28,7 +29,8 @@ module.exports = {
         .captureOrder(user, orderId);
       ctx.send(capture);
     } catch (err) {
-      return (ctx as any).badRequest(err.message, err.response.data);
+      console.log("❌ CAPTURE ORDER: ", err);
+      return (ctx as any).badRequest(err.message, err.details);
     }
   },
 };

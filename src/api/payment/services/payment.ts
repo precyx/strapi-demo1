@@ -7,41 +7,65 @@ const PAYPAL_API = process.env.PAYPAL_API || "https://api-m.sandbox.paypal.com";
 const CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
 const CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
 
-module.exports = {
-  async getCoursePrices(courseIds) {
-    const courses = await strapi.documents("api::course.course").findMany({
-      filters: { documentId: { $in: courseIds } },
-      fields: ["id", "price"],
-    });
-
-    if (!courses.length) {
-      throw new Error("No valid courses found for the given IDs.");
+const _createPaypalOrder = async (purchase_units: any[]) => {
+  const auth = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString("base64"); // prettier-ignore
+  const response = await axios.post(
+    `${PAYPAL_API}/v2/checkout/orders`,
+    {
+      intent: "CAPTURE",
+      purchase_units,
+    },
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Basic ${auth}`,
+      },
     }
+  );
+  return response.data;
+};
 
-    return courses.map((course) => ({
-      id: course.id,
-      price: course.price || 0,
-      documentId: course.documentId,
-    }));
-  },
+const _capturePaypalOrder = async (method, endpoint, data = {}) => {
+  const auth = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString("base64");
+  const response = await axios({
+    method,
+    url: `${PAYPAL_API}/v2/checkout/orders/${endpoint}`,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Basic ${auth}`,
+    },
+    data,
+  });
+  return response.data;
+};
 
+const _getCoursePrices = async (courseIds: string[]) => {
+  const courses = await strapi.documents("api::course.course").findMany({
+    filters: { documentId: { $in: courseIds } },
+    fields: ["id", "price"],
+  });
+
+  if (!courses.length) {
+    throw new Error("No valid courses found for the given IDs.");
+  }
+
+  return courses.map((course) => ({
+    id: course.id,
+    price: course.price || 0,
+    documentId: course.documentId,
+  }));
+};
+
+module.exports = {
   /**
    * Create Order
    */
   async createOrder(courseIds: string[]) {
-    if (!courseIds || courseIds.length === 0) {
-      throw new ApplicationError("No course IDs provided.");
-    }
+    if (!courseIds?.length) throw new ApplicationError("No course IDs provided."); // prettier-ignore
 
     // ✅ get course prices
-    const courses = await this.getCoursePrices(courseIds);
-
-    console.log("🐸 CREATE ORDER - courses", courses);
-
-    const totalAmount = courses
-      .reduce((sum, course) => sum + course.price, 0)
-      .toFixed(2);
-
+    const courses = await _getCoursePrices(courseIds);
+    const totalAmount = courses.reduce((sum, course) => sum + course.price, 0).toFixed(2); // prettier-ignore
     const purchase_units = [
       {
         description: `Courses: ${courseIds.join(", ")}`,
@@ -51,80 +75,56 @@ module.exports = {
         },
       },
     ];
-
-    // ✅ encode authentication for paypal
-    const auth = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString(
-      "base64"
-    );
+    console.log("🐸 CREATE ORDER - courses", courses);
 
     // ✅ create paypal order
-    const response = await axios.post(
-      `${PAYPAL_API}/v2/checkout/orders`,
-      {
-        intent: "CAPTURE",
-        purchase_units,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Basic ${auth}`,
-        },
-      }
-    );
-
-    return response.data;
+    let response = _createPaypalOrder(purchase_units);
+    return response;
   },
 
   /**
    * Capture Order
    */
-  async captureOrder(user, orderId) {
+  async captureOrder(user, orderId: string) {
     debugger;
-    if (!user) {
-      throw new UnauthorizedError("You are not logged in.");
-    }
-    if (!orderId) {
-      throw new ApplicationError("Order ID is required.");
-    }
-
-    // ✅ encode authentication for paypal
-    const auth = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString(
-      "base64"
-    );
+    if (!user) throw new UnauthorizedError("You are not logged in.");
+    if (!orderId) throw new ApplicationError("Order ID is required.");
 
     // ✅ get cart
     let cart = await strapi.documents("api::cart.cart").findFirst({
       filters: { user: { documentId: user.documentId } },
       populate: "*",
     });
+    if (!cart?.courses?.length) throw new ApplicationError("Cart not found for this user."); // prettier-ignore
 
-    if (!cart) {
-      throw new ApplicationError("Cart not found for this user.");
+    let cartCoursesIds: string[] = cart.courses.map((course) => course.documentId); // prettier-ignore
+    let userCoursesIds: string[] = user.courses.map((course) => course.documentId); // prettier-ignore
+
+    // ✅ check for already purchased courses
+    const alreadyPurchasedCourses = user.courses.filter((course) => cartCoursesIds.includes(course.documentId)); // prettier-ignore
+    if (alreadyPurchasedCourses.length > 0) {
+      throw new ApplicationError(`You have already purchased the following courses: ${alreadyPurchasedCourses.join(", ")}`); // prettier-ignore
     }
 
-    let cartCourses = cart.courses.map((course) => course.documentId);
+    // ✅ Get PayPal order details
+    let paypalOrder = await _capturePaypalOrder("GET", orderId);
 
-    // ✅ capture paypal order
-    const paypalCapture = await axios.post(
-      `${PAYPAL_API}/v2/checkout/orders/${orderId}/capture`,
-      {},
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Basic ${auth}`,
-        },
-      }
-    );
-    const paypalCaptureData = paypalCapture.data;
+    // ✅ check if paypal total matches the cart total
+    let _paypalTotal = parseFloat(paypalOrder.purchase_units[0].amount.value); // prettier-ignore
+    let _cartTotal = cart.courses.reduce((sum, course) => sum + course.price, 0); // prettier-ignore
+    let TOLERANCE = 0.1;
+    if (Math.abs(_paypalTotal - _cartTotal) > TOLERANCE) {
+      throw new ApplicationError(`PayPal total does not match cart total: ${_paypalTotal} !== ${_cartTotal}`); // prettier-ignore
+    }
 
+    // ✅ Capture PayPal order
+    const paypalCaptureData = await _capturePaypalOrder("POST", `${orderId}/capture`); // prettier-ignore
     if (paypalCaptureData.status !== "COMPLETED") {
-      throw new ApplicationError(
-        `PayPal order capture failed: ${paypalCaptureData.status}`
-      );
+      throw new ApplicationError(`PayPal order capture failed: ${paypalCaptureData.status}`); // prettier-ignore
     }
 
     // ✅ update user's bought courses
-    const updatedCourses = [...new Set([...user.courses, ...cartCourses])];
+    const updatedCourses = [...new Set([...userCoursesIds, ...cartCoursesIds])];
     await strapi.documents("api::user-custom.user-custom").update({
       documentId: user.documentId,
       data: { courses: updatedCourses },

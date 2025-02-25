@@ -9,6 +9,8 @@ export default factories.createCoreController(
      */
     async get(ctx) {
       try {
+        //ctx.throw(404, "Data not found");
+
         //debugger;
         if (!ctx.state.user) {
           return ctx.unauthorized("You are not logged in.");
@@ -27,7 +29,8 @@ export default factories.createCoreController(
 
         ctx.send(cart || { courses: [] });
       } catch (err) {
-        ctx.throw(500, "Error fetching the cart.");
+        console.log("❌ CART GET: ", err);
+        return ctx.badRequest("Error fetching the cart.");
       }
     },
 
@@ -36,13 +39,11 @@ export default factories.createCoreController(
      */
     async update(ctx) {
       try {
-        debugger;
-        if (!ctx.state.user) {
-          return ctx.unauthorized("You are not logged in.");
-        }
+        //debugger;
         let user = ctx.state.user;
-
         const { courseId } = ctx.request.body; // courseId and quantity will be passed in the request body
+
+        if (!ctx.state.user) return ctx.unauthorized("You are not logged in."); // prettier-ignore
 
         // ✅ find cart by user
         let cart;
@@ -63,15 +64,10 @@ export default factories.createCoreController(
         let course = await strapi.documents("api::course.course").findFirst({
           filters: { documentId: courseId },
         });
-
-        if (!course) {
-          return ctx.badRequest("Course not found");
-        }
+        if (!course) return ctx.badRequest("Course not found"); // prettier-ignore
 
         // ✅ check if course is already in the cart
-        if (!cart.courses.includes(courseId)) {
-          cart.courses.push(courseId);
-        }
+        if (!cart.courses.includes(courseId)) cart.courses.push(courseId);
 
         // ✅ update cart
         let updatedCart = await strapi.documents("api::cart.cart").update({
@@ -85,7 +81,8 @@ export default factories.createCoreController(
 
         ctx.send(updatedCart);
       } catch (err) {
-        ctx.throw(500, "Error updating the cart.");
+        console.log("❌ UPDATE CART: ", err);
+        return (ctx as any).badRequest(err.message, err.details);
       }
     },
 
@@ -95,38 +92,28 @@ export default factories.createCoreController(
     async delete(ctx) {
       debugger;
       try {
-        if (!ctx.state.user) {
-          return ctx.unauthorized("You are not logged in.");
-        }
         let user = ctx.state.user;
+        const { courseId } = ctx.request.body;
 
-        const { courseId } = ctx.request.body; // courseId will be passed in the request body for removal
+        if (!ctx.state.user) return ctx.unauthorized("You are not logged in."); // prettier-ignore
 
         // ✅ find cart by user
         let cart = await strapi.documents("api::cart.cart").findFirst({
           filters: { user: { documentId: user.documentId } },
           populate: "*",
         });
+        if (!cart) return ctx.notFound("Cart not found for this user.");
 
-        if (!cart) {
-          return ctx.notFound("Cart not found for this user.");
-        }
-
-        // ✅ If no courseId provided, clear the entire cart
+        // ✅ If no courseId provided, delete the whole cart
         if (!courseId) {
-          await strapi.services.cart.delete({ user: user.id });
-
           await strapi.documents("api::cart.cart").delete({
-            documentId: cart[0].documentId,
+            documentId: cart.documentId,
           });
-
           return ctx.send({ message: "Cart cleared successfully." });
         }
 
         // ✅ remove course from cart
-        const updatedCourses = cart.courses.filter(
-          (item) => item.documentId !== courseId
-        );
+        const updatedCourses = cart.courses.filter((item) => item.documentId !== courseId); // prettier-ignore
 
         // ✅ update cart
         if (updatedCourses.length !== cart.courses.length) {
@@ -141,7 +128,7 @@ export default factories.createCoreController(
           return ctx.send(updatedCart);
         }
 
-        // If the course was not found in the cart
+        // ✅ if the course was not found in the cart
         return ctx.badRequest("Course not found in cart.");
       } catch (err) {
         ctx.throw(500, "Error removing the course from the cart.");

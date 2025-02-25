@@ -26,15 +26,11 @@ export const login = async ({ email, password }) => {
       filters: { email },
     });
 
-  if (!user) {
-    throw new Error("Invalid email or password.");
-  }
+  if (!user) throw new Error("Invalid email or password."); // prettier-ignore
 
   // ✅ check pw
   const validPassword = await bcrypt.compare(password, user.password);
-  if (!validPassword) {
-    throw new Error("Invalid email or password.");
-  }
+  if (!validPassword) throw new Error("Invalid email or password."); // prettier-ignore
 
   // ✅ generate jwt
   const loginToken = generateJWT(user.documentId, user.email, "7d");
