@@ -117,20 +117,64 @@ module.exports = {
       throw new ApplicationError(`PayPal total does not match cart total: ${_paypalTotal} !== ${_cartTotal}`); // prettier-ignore
     }
 
+    // ✅ Create Order object
+    const order = {
+      user: user.documentId,
+      orderId: orderId,
+      paymentMethod: "paypal",
+      courses: cart.courses.map((course) => course.documentId),
+      totalPrice: _paypalTotal,
+      prices: cart.courses.map((course) => {
+        return {
+          price: course.price,
+          documentId: course.documentId,
+        };
+      }),
+      //
+      orderDate: new Date(),
+      orderStatus: "created",
+      orderHistory: "created",
+      //
+    };
+
+    // ✅ Create order object
+    let newOrder = await strapi.documents("api::order.order").create({
+      data: { ...order },
+    });
+
     // ✅ Capture PayPal order
     const paypalCaptureData = await _capturePaypalOrder("POST", `${orderId}/capture`); // prettier-ignore
     if (paypalCaptureData.status !== "COMPLETED") {
       throw new ApplicationError(`PayPal order capture failed: ${paypalCaptureData.status}`); // prettier-ignore
     }
 
-    // ✅ update user's bought courses
+    // ✅ Update order object
+    newOrder = await strapi.documents("api::order.order").update({
+      documentId: newOrder.documentId,
+      data: {
+        orderStatus: "paypal captured",
+        orderHistory: newOrder.orderHistory + ", paypal captured",
+      },
+    });
+
+    // ✅ Update user's bought courses
     const updatedCourses = [...new Set([...userCoursesIds, ...cartCoursesIds])];
     await strapi.documents("api::user-custom.user-custom").update({
       documentId: user.documentId,
       data: { courses: updatedCourses },
     });
 
-    // ✅ clear cart
+    // ✅ Update order object
+    newOrder = await strapi.documents("api::order.order").update({
+      documentId: newOrder.documentId,
+      data: {
+        orderStatus: "courses added",
+        orderHistory: newOrder.orderHistory + ", coursesAdded",
+        courses: cartCoursesIds,
+      },
+    });
+
+    // ✅ Clear cart
     await strapi.documents("api::cart.cart").delete({
       documentId: cart.documentId,
     });

@@ -2,7 +2,7 @@ export default {
   routes: [
     {
       method: "GET",
-      path: "/cart/get",
+      path: "/cart",
       handler: "cart.get",
       config: { middlewares: ["global::jwtAuth"] },
     },

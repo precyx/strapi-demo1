@@ -23,14 +23,10 @@ export default factories.createCoreController(
           populate: "*",
         });
 
-        /*if (!cart) {
-          return ctx.notFound("Cart not found for this user.");
-        }*/
-
         ctx.send(cart || { courses: [] });
       } catch (err) {
-        console.log("❌ CART GET: ", err);
-        return ctx.badRequest("Error fetching the cart.");
+        console.log("❌ CART CART: ", err);
+        return (ctx as any).badRequest(err.message, err.details);
       }
     },
 
@@ -106,9 +102,7 @@ export default factories.createCoreController(
 
         // ✅ If no courseId provided, delete the whole cart
         if (!courseId) {
-          await strapi.documents("api::cart.cart").delete({
-            documentId: cart.documentId,
-          });
+          await strapi.documents("api::cart.cart").delete({documentId: cart.documentId,}); // prettier-ignore
           return ctx.send({ message: "Cart cleared successfully." });
         }
 

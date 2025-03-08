@@ -609,6 +609,43 @@ export interface ApiIngredientIngredient extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
+  collectionName: 'orders';
+  info: {
+    description: '';
+    displayName: 'Order';
+    pluralName: 'orders';
+    singularName: 'order';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    courses: Schema.Attribute.Relation<'oneToMany', 'api::course.course'>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::order.order'> &
+      Schema.Attribute.Private;
+    orderDate: Schema.Attribute.DateTime;
+    orderHistory: Schema.Attribute.String;
+    orderId: Schema.Attribute.String;
+    orderStatus: Schema.Attribute.String;
+    paymentMethod: Schema.Attribute.String;
+    prices: Schema.Attribute.JSON;
+    publishedAt: Schema.Attribute.DateTime;
+    totalPrice: Schema.Attribute.Decimal;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    user: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::user-custom.user-custom'
+    >;
+  };
+}
+
 export interface ApiProductProduct extends Struct.CollectionTypeSchema {
   collectionName: 'products';
   info: {
@@ -703,6 +740,7 @@ export interface ApiUserCustomUserCustom extends Struct.CollectionTypeSchema {
       'api::user-custom.user-custom'
     > &
       Schema.Attribute.Private;
+    orders: Schema.Attribute.Relation<'oneToMany', 'api::order.order'>;
     password: Schema.Attribute.String &
       Schema.Attribute.Required &
       Schema.Attribute.Private;
@@ -1335,6 +1373,7 @@ declare module '@strapi/strapi' {
       'api::formula.formula': ApiFormulaFormula;
       'api::global.global': ApiGlobalGlobal;
       'api::ingredient.ingredient': ApiIngredientIngredient;
+      'api::order.order': ApiOrderOrder;
       'api::product.product': ApiProductProduct;
       'api::user-custom.user-custom': ApiUserCustomUserCustom;
       'api::utensil.utensil': ApiUtensilUtensil;

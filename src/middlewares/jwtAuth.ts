@@ -19,7 +19,7 @@ export default (config, { strapi: Strapi }) => {
         documentId: string;
       };
 
-      // ✅ Attach user documentId to request
+      // ✅ Attach user to request
       let user = await strapi
         .documents("api::user-custom.user-custom")
         .findOne({
