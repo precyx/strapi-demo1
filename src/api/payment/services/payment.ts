@@ -1,11 +1,23 @@
 import sendEmail from "../../../services/email";
 import axios from "axios";
+import { UID, Data } from "@strapi/strapi";
 import { errors } from "@strapi/utils";
 const { ApplicationError, UnauthorizedError } = errors;
+
+type User = Data.ContentType<"api::user-custom.user-custom">;
 
 const PAYPAL_API = process.env.PAYPAL_API || "https://api-m.sandbox.paypal.com";
 const CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
 const CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
+
+const OrderPopulate = {
+  courses: {
+    populate: {
+      videoPreview: true,
+    },
+  },
+  user: true,
+};
 
 const _createPaypalOrder = async (purchase_units: any[]) => {
   const auth = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString("base64"); // prettier-ignore
@@ -85,7 +97,7 @@ module.exports = {
   /**
    * Capture Order
    */
-  async captureOrder(user, orderId: string) {
+  async captureOrder(user: User, orderId: string) {
     debugger;
     if (!user) throw new UnauthorizedError("You are not logged in.");
     if (!orderId) throw new ApplicationError("Order ID is required.");
@@ -139,6 +151,7 @@ module.exports = {
 
     // ✅ Create order object
     let newOrder = await strapi.documents("api::order.order").create({
+      populate: OrderPopulate,
       data: { ...order },
     });
 
@@ -150,6 +163,7 @@ module.exports = {
 
     // ✅ Update order object
     newOrder = await strapi.documents("api::order.order").update({
+      populate: OrderPopulate,
       documentId: newOrder.documentId,
       data: {
         orderStatus: "paypal captured",
@@ -166,6 +180,7 @@ module.exports = {
 
     // ✅ Update order object
     newOrder = await strapi.documents("api::order.order").update({
+      populate: OrderPopulate,
       documentId: newOrder.documentId,
       data: {
         orderStatus: "courses added",
@@ -179,19 +194,38 @@ module.exports = {
       documentId: cart.documentId,
     });
 
-    /*
-    // ✅ send user email
-    let to = email;
-    let subject = "Verifica tu cuenta";
-    let templateName = "confirm-registration";
+    debugger;
+
+    // ✅ Send user email
+    let to = user.email;
+    let subject = "Gracias por tu compra";
+    let templateName = "order-user";
+    const baseUrl = process.env.CORS_ORIGIN;
+    const imgBaseUrl = process.env.CORS_ORIGIN_LIVE;
     let variables = {
-      name: username,
-      registrationLink: registrationLink,
-      email: email,
       baseUrl: baseUrl,
       imgBaseUrl: imgBaseUrl,
+      username: newOrder.user.username,
+      email: newOrder.user.email,
+      courses: newOrder.courses,
+      paymentMethod: newOrder.paymentMethod,
+      orderId: newOrder.orderId,
+      orderDate: newOrder.orderDate,
+      totalPrice: newOrder.totalPrice + "",
     };
     await sendEmail(to, subject, templateName, variables);
+
+    /*
+    // ✅ send admin email
+    let to2 = "ADMIN-EMAIL";
+    let subject2 = "Gracias por tu compra";
+    let templateName2 = "order-admin";
+    let variables2 = {
+      username: user.username,
+      email: user.email,
+      courses: newOrder.courses,
+    };
+    await sendEmail(to2, subject2, templateName2, variables2);
     */
 
     return paypalCaptureData;

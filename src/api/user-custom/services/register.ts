@@ -63,7 +63,7 @@ export const register = async ({username, email, password, phone, country}) => {
   const confirmationToken = generateJWT(user.documentId, user.email, "1d");
   const registrationLink = `${process.env.CORS_ORIGIN}/login/verify-email?token=${confirmationToken}`;
   const baseUrl = process.env.CORS_ORIGIN;
-  const imgBaseUrl = process.env.CORST_ORIGIN_LIVE;
+  const imgBaseUrl = process.env.CORS_ORIGIN_LIVE;
 
   // ✅ send email
   let to = email;

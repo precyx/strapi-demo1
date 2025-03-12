@@ -1,6 +1,14 @@
 import { factories } from "@strapi/strapi";
 import { Context } from "koa";
 
+const OrderPopulate = {
+  courses: {
+    populate: {
+      videoPreview: true,
+    },
+  },
+};
+
 export default factories.createCoreController(
   "api::order.order",
   ({ strapi }) => ({
@@ -18,13 +26,7 @@ export default factories.createCoreController(
         // ✅ get orders by user
         const orders = await strapi.documents("api::order.order").findMany({
           filters: { user: { documentId: user.documentId } },
-          populate: {
-            courses: {
-              populate: {
-                videoPreview: true,
-              },
-            },
-          },
+          populate: OrderPopulate,
         });
 
         ctx.send(orders);
