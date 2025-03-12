@@ -3,7 +3,9 @@ import fs from "fs";
 import Handlebars from "handlebars";
 import path from "path";
 import mailgun from "mailgun-js";
+import { errors } from "@strapi/utils";
 
+const { ApplicationError, UnauthorizedError } = errors;
 const EMAIL_MODE = process.env.EMAIL_MODE;
 
 /**

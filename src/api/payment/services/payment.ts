@@ -1,6 +1,6 @@
-const axios = require("axios");
-
-const { errors } = require("@strapi/utils");
+import sendEmail from "../../../services/email";
+import axios from "axios";
+import { errors } from "@strapi/utils";
 const { ApplicationError, UnauthorizedError } = errors;
 
 const PAYPAL_API = process.env.PAYPAL_API || "https://api-m.sandbox.paypal.com";
@@ -178,6 +178,21 @@ module.exports = {
     await strapi.documents("api::cart.cart").delete({
       documentId: cart.documentId,
     });
+
+    /*
+    // ✅ send user email
+    let to = email;
+    let subject = "Verifica tu cuenta";
+    let templateName = "confirm-registration";
+    let variables = {
+      name: username,
+      registrationLink: registrationLink,
+      email: email,
+      baseUrl: baseUrl,
+      imgBaseUrl: imgBaseUrl,
+    };
+    await sendEmail(to, subject, templateName, variables);
+    */
 
     return paypalCaptureData;
   },
