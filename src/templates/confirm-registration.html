@@ -1,20 +1,121 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <style>
-    .button {
-      background-color: #ff9900;
-      padding: 10px 20px;
-      border-radius: 5px;
-      text-decoration: none;
-      color: white;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Confirmation</title>
+    <style>
+        /* Reset styles for better cross-client consistency */
+        body, table, td, a {
+            margin: 0;
+            padding: 0;
+            text-size-adjust: 100%;
+            font-family: Arial, sans-serif;
+        }
+
+        img {
+            border: 0;
+            display: block;
+        }
+
+        table {
+            border-spacing: 0;
+        }
+
+        /* Layout styles */
+        .email-wrapper {
+            width: 100%;
+        }
+
+        .email-content {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+
+        .email-section {
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 30px;
+        }
+
+        .footer-container {
+          margin-top: 5px;
+        }
+
+        .email-footer {
+            text-align: center;
+            color: #98A0A5;
+            font-size: 12px;
+        }
+
+        .button {
+            background: linear-gradient(to right, #8FC04B, #2695C7);
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 8px 25px;
+            display: inline-block;
+            margin-top: 15px;
+            border-radius: 40px;
+            font-style: italic;
+        }
+
+        /* Fallback for email clients that do not support gradients */
+        .button-fallback {
+            background-color: #8FC04B; /* Solid green for fallback */
+        }
+
+        /* Responsive styles */
+        @media only screen and (max-width: 600px) {
+            .email-content {
+                width: 100% !important;
+            }
+        }
+    </style>
 </head>
 <body>
-  <h2>Hello, {{name}}!</h2>
-  <p>Thank you for signing up for our cleaning product courses.</p>
-  <p>{{email}}</p>
-  <a class="button" href="{{registrationLink}}">Verify Email</a>
+    <table class="email-wrapper" cellpadding="0" cellspacing="0">
+        <tr>
+            <td align="center">
+                <table class="email-content" cellpadding="0" cellspacing="0">
+                    <!-- Section with logo, text, and button -->
+                    <tr height="20" style="height:20px"><td></td></tr>
+                    <tr>
+                        <td class="email-section" style="padding: 30px;">
+                          <a href="{{baseUrl}}" target="_blank">
+                            <img src="{{imgBaseUrl}}/img/email/logo-color.png" alt="Snaiders Clean Logo" height="65" style="margin: 0 auto;">
+                          </a>
+                            <p style="color: #2E3234; font-size: 14px; line-height: 1.5;">
+                              Hola <b>{{name}}</b>,
+                              <br />
+                              <br />
+                              ¡Gracias por registrarte en nuestro sitio! Para completar el proceso, por favor haz clic en el botón de abajo para verificar tu cuenta. 
+                              <br />
+                              <br />
+                              Si no te registraste en nuestro sitio, por favor ignora este correo. 
+                              <br />
+                              <br />
+                              Saludos,
+                              <br />
+                              El equipo de Snaider Clean
+                            </p>
+                            <!-- Button -->
+                            <a href="{{registrationLink}}" class="button button-fallback" style="background: linear-gradient(to right, #8FC04B, #2695C7); color: #ffffff; text-decoration: none; font-size: 16px; padding: 8px 25px; display: inline-block; margin-top: 15px; border-radius: 40px; font-style: italic;">Verifica tu correo</a>
+                        </td>
+                    </tr>
+                    <tr height="5" style="height:5px"><td></td></tr>
+                    
+                    <!-- Footer -->
+                    <tr class="footer-container">
+                        <td class="email-footer" style="text-align: center; color: #98A0A5; font-size: 12px; padding-top: 5px;">
+                            © Snaiders Clean 2025
+                        </td>
+                    </tr>
+                    <tr height="20" style="height:20px"><td></td></tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>

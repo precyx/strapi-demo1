@@ -5,12 +5,8 @@ module.exports = {
     const { ids } = ctx.request.body;
 
     try {
-      const order = await strapi
-        .service("api::payment.payment")
-        .createOrder(ids);
-
+      const order = await strapi.service("api::payment.payment").createOrder(ids); // prettier-ignore
       console.log("order", order);
-
       ctx.send(order);
     } catch (err) {
       debugger;
@@ -24,9 +20,7 @@ module.exports = {
     const { orderId } = ctx.request.body;
 
     try {
-      const capture = await strapi
-        .service("api::payment.payment")
-        .captureOrder(user, orderId);
+      const capture = await strapi.service("api::payment.payment").captureOrder(user, orderId); // prettier-ignore
       ctx.send(capture);
     } catch (err) {
       console.log("❌ CAPTURE ORDER: ", err);

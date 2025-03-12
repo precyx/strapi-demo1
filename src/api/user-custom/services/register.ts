@@ -40,13 +40,8 @@ const generateJWT = (documentId, email, days) => {
 /**
  * Register
  */
-export const register = async ({
-  username,
-  email,
-  password,
-  phone,
-  country,
-}) => {
+// prettier-ignore
+export const register = async ({username, email, password, phone, country}) => {
   // ✅ check if user already exists
   const existingUser = await strapi
     .documents("api::user-custom.user-custom")
@@ -67,15 +62,19 @@ export const register = async ({
   const loginToken = generateJWT(user.documentId, user.email, "7d");
   const confirmationToken = generateJWT(user.documentId, user.email, "1d");
   const registrationLink = `${process.env.CORS_ORIGIN}/login/verify-email?token=${confirmationToken}`;
+  const baseUrl = process.env.CORS_ORIGIN;
+  const imgBaseUrl = process.env.CORST_ORIGIN_LIVE;
 
   // ✅ send email
   let to = email;
-  let subject = "Confirm Your Registration";
+  let subject = "Verifica tu cuenta";
   let templateName = "confirm-registration";
   let variables = {
     name: username,
     registrationLink: registrationLink,
     email: email,
+    baseUrl: baseUrl,
+    imgBaseUrl: imgBaseUrl
   };
   await sendEmail(to, subject, templateName, variables);
 
