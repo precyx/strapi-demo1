@@ -37,8 +37,19 @@
               <a href="{{baseUrl}}" target="_blank">
                 <img src="{{imgBaseUrl}}/img/email/logo-color.png" alt="Snaiders Clean Logo" height="60" style="margin: 0 auto;">
               </a>
-              <p style="color: #50595F; font-size: 24px; font-weight: bold; margin-top: 30px;">¡Gracias por tu compra {{username}}!</p>
-              <p style="color: #50595F; font-size: 14px; line-height: 1.5;">Gracias por tu compra en Snaiders Clean! Tu pedido ha sido recibido con éxito.</p>
+              <p style="color: #50595F; font-size: 24px; font-weight: bold; margin-top: 30px;">Nuevo Pedido:</p>
+              <p style="color: #50595F; font-size: 14px; line-height: 1.5; border-bottom: 1px solid rgba(39, 147, 206, 0.13); padding-bottom:10px;">
+               <b> Informacion de Usario</b> <br/>
+               {{username}} <br/>
+               {{userEmail}} <br/>
+               {{userPhone}} <br/>
+               {{userCountry}} <br/>
+              </p>
+              <p style="color: #50595F; font-size: 14px; line-height: 1.5; border-bottom: 1px solid rgba(39, 147, 206, 0.13); padding-bottom:10px;">
+                <b> Forma de Pago</b> <br/>
+                {{paymentMethod}} 
+              </p>
+
               <p class="order-total">Pedido {{orderId}} de {{orderDate}}</p>
               <p style="font-size: 14px; color: #50595F; border-bottom: 1px solid rgba(39, 147, 206, 0.13); padding-bottom:10px; margin-bottom:0;">Total: <span style="color: #8FC04B">${{totalPrice}}</span></p>
 
@@ -53,14 +64,7 @@
                 </div>
               {{/each}}
 
-              <!-- Payment method -->
-              <p class="payment-method">
-                <b>Forma de Pago</b>
-                <br>
-                {{paymentMethod}}
-              </p>
-
-              <a href="{{myOrdersLink}}" class="button button-fallback" style="background: linear-gradient(to right, #8FC04B, #2695C7); color: #ffffff; text-decoration: none; font-size: 16px; padding: 8px 25px; display: inline-block; margin-top: 15px; border-radius: 40px; font-style: italic;">Ver mis Pedidos</a>
+              <a href="{{myOrdersLink}}" class="button button-fallback" style="background: linear-gradient(to right, #8FC04B, #2695C7); color: #ffffff; text-decoration: none; font-size: 16px; padding: 8px 25px; display: inline-block; margin-top: 15px; border-radius: 40px; font-style: italic;">Ver Pedido</a>
             </td>
           </tr>
           

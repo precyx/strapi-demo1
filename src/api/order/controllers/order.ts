@@ -18,9 +18,7 @@ export default factories.createCoreController(
     async get(ctx) {
       try {
         // ✅ check if user is logged in
-        if (!ctx.state.user) {
-          return ctx.unauthorized("You are not logged in.");
-        }
+        if (!ctx.state.user) return ctx.unauthorized("You are not logged in."); // prettier-ignore
         let user = ctx.state.user;
 
         // ✅ get orders by user

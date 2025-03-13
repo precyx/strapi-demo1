@@ -9,6 +9,9 @@ type User = Data.ContentType<"api::user-custom.user-custom">;
 const PAYPAL_API = process.env.PAYPAL_API || "https://api-m.sandbox.paypal.com";
 const CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
 const CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
+const BASE_URL = process.env.CORS_ORIGIN;
+const IMG_BASE_URL = process.env.CORS_ORIGIN_LIVE;
+const EMAIL_ADMIN_RECEIVER = process.env.EMAIL_ADMIN_RECEIVER;
 
 const OrderPopulate = {
   courses: {
@@ -200,11 +203,10 @@ module.exports = {
     let to = user.email;
     let subject = "Gracias por tu compra";
     let templateName = "order-user";
-    const baseUrl = process.env.CORS_ORIGIN;
-    const imgBaseUrl = process.env.CORS_ORIGIN_LIVE;
+    //
     let variables = {
-      baseUrl: baseUrl,
-      imgBaseUrl: imgBaseUrl,
+      baseUrl: BASE_URL,
+      imgBaseUrl: IMG_BASE_URL,
       username: newOrder.user.username,
       email: newOrder.user.email,
       courses: newOrder.courses,
@@ -212,22 +214,29 @@ module.exports = {
       orderId: newOrder.orderId,
       orderDate: new Date(newOrder.orderDate).toISOString().slice(0, 10),
       totalPrice: newOrder.totalPrice + "",
-      myOrdersLink: `${baseUrl}/profile`,
+      myOrdersLink: `${BASE_URL}/profile`,
     };
     await sendEmail(to, subject, templateName, variables);
 
-    /*
     // ✅ send admin email
-    let to2 = "ADMIN-EMAIL";
-    let subject2 = "Gracias por tu compra";
+    let to2 = EMAIL_ADMIN_RECEIVER;
+    let subject2 = "Nuevo Pedido";
     let templateName2 = "order-admin";
     let variables2 = {
-      username: user.username,
-      email: user.email,
+      baseUrl: BASE_URL,
+      imgBaseUrl: IMG_BASE_URL,
+      username: newOrder.user.username,
+      userEmail: newOrder.user.email,
+      userPhone: newOrder.user.phone,
+      userCountry: newOrder.user.country,
       courses: newOrder.courses,
+      paymentMethod: newOrder.paymentMethod,
+      orderId: newOrder.orderId,
+      orderDate: new Date(newOrder.orderDate).toISOString().slice(0, 10),
+      totalPrice: newOrder.totalPrice + "",
+      myOrdersLink: `${BASE_URL}/profile`,
     };
     await sendEmail(to2, subject2, templateName2, variables2);
-    */
 
     return paypalCaptureData;
   },
