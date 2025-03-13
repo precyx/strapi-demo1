@@ -210,8 +210,9 @@ module.exports = {
       courses: newOrder.courses,
       paymentMethod: newOrder.paymentMethod,
       orderId: newOrder.orderId,
-      orderDate: newOrder.orderDate,
+      orderDate: new Date(newOrder.orderDate).toISOString().slice(0, 10),
       totalPrice: newOrder.totalPrice + "",
+      myOrdersLink: `${baseUrl}/profile`,
     };
     await sendEmail(to, subject, templateName, variables);
 
