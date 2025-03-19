@@ -1,0 +1,26 @@
+{
+  "kind": "singleType",
+  "collectionName": "payment_settings",
+  "info": {
+    "singularName": "payment-setting",
+    "pluralName": "payment-settings",
+    "displayName": "PaymentSettings"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "Bank": {
+      "type": "string"
+    },
+    "phoneNumber": {
+      "type": "string"
+    },
+    "identityDocument": {
+      "type": "string"
+    },
+    "concept": {
+      "type": "string"
+    }
+  }
+}

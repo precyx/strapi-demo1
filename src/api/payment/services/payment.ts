@@ -5,6 +5,7 @@ import { errors } from "@strapi/utils";
 const { ApplicationError, UnauthorizedError } = errors;
 
 type User = Data.ContentType<"api::user-custom.user-custom">;
+type Order = Data.ContentType<"api::order.order">;
 
 const PAYPAL_API = process.env.PAYPAL_API || "https://api-m.sandbox.paypal.com";
 const CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
@@ -71,6 +72,47 @@ const _getCoursePrices = async (courseIds: string[]) => {
   }));
 };
 
+const _sendOrderEmails = async (order: Order) => {
+  const toUser = order.user.email;
+  const subjectUser = "Gracias por tu compra";
+  const templateNameUser = "order-user";
+
+  const variablesForUser = {
+    baseUrl: BASE_URL,
+    imgBaseUrl: IMG_BASE_URL,
+    username: order.user.username,
+    email: order.user.email,
+    courses: order.courses,
+    paymentMethod: order.paymentMethod,
+    orderId: order.orderId,
+    orderDate: new Date(order.orderDate).toISOString().slice(0, 10),
+    totalPrice: `${order.totalPrice}`,
+    myOrdersLink: `${BASE_URL}/profile`,
+  };
+  await sendEmail(toUser, subjectUser, templateNameUser, variablesForUser);
+
+  // Admin email
+  const toAdmin = EMAIL_ADMIN_RECEIVER;
+  const subjectAdmin = "Nuevo Pedido";
+  const templateNameAdmin = "order-admin";
+
+  const variablesForAdmin = {
+    baseUrl: BASE_URL,
+    imgBaseUrl: IMG_BASE_URL,
+    username: order.user.username,
+    userEmail: order.user.email,
+    userPhone: order.user.phone,
+    userCountry: order.user.country,
+    courses: order.courses,
+    paymentMethod: order.paymentMethod,
+    orderId: order.orderId,
+    orderDate: new Date(order.orderDate).toISOString().slice(0, 10),
+    totalPrice: `${order.totalPrice}`,
+    myOrdersLink: `${BASE_URL}/profile`,
+  };
+  await sendEmail(toAdmin, subjectAdmin, templateNameAdmin, variablesForAdmin);
+};
+
 module.exports = {
   /**
    * Create Order
@@ -100,12 +142,13 @@ module.exports = {
   /**
    * Capture Order
    */
-  async captureOrder(user: User, orderId: string) {
+  async captureOrder(user: User, orderId: string, paymentMethod: string) {
     debugger;
     if (!user) throw new UnauthorizedError("You are not logged in.");
     if (!orderId) throw new ApplicationError("Order ID is required.");
+    if (!["paypal", "pagomovil"].includes(paymentMethod)) throw new ApplicationError("No recognized Payment Method."); // prettier-ignore
 
-    // ✅ get cart
+    // ✅ 1. get cart
     let cart = await strapi.documents("api::cart.cart").findFirst({
       filters: { user: { documentId: user.documentId } },
       populate: "*",
@@ -115,28 +158,29 @@ module.exports = {
     let cartCoursesIds: string[] = cart.courses.map((course) => course.documentId); // prettier-ignore
     let userCoursesIds: string[] = user.courses.map((course) => course.documentId); // prettier-ignore
 
-    // ✅ check for already purchased courses
+    // ✅ 2. check for already purchased courses
     const alreadyPurchasedCourses = user.courses.filter((course) => cartCoursesIds.includes(course.documentId)); // prettier-ignore
     if (alreadyPurchasedCourses.length > 0) {
       throw new ApplicationError(`You have already purchased the following courses: ${alreadyPurchasedCourses.join(", ")}`); // prettier-ignore
     }
 
-    // ✅ Get PayPal order details
-    let paypalOrder = await _capturePaypalOrder("GET", orderId);
+    // ✅ 3. If PayPal, get the order details
+    let paypalOrder;
+    if (paymentMethod == "paypal") paypalOrder = await _capturePaypalOrder("GET", orderId); // prettier-ignore
 
-    // ✅ check if paypal total matches the cart total
-    let _paypalTotal = parseFloat(paypalOrder.purchase_units[0].amount.value); // prettier-ignore
+    // ✅ 4. Check if paypal total matches the cart total
     let _cartTotal = cart.courses.reduce((sum, course) => sum + course.price, 0); // prettier-ignore
+    let _paypalTotal = paymentMethod == "pagomovil" ? _cartTotal : parseFloat(paypalOrder.purchase_units[0].amount.value); // prettier-ignore
     let TOLERANCE = 0.1;
     if (Math.abs(_paypalTotal - _cartTotal) > TOLERANCE) {
       throw new ApplicationError(`PayPal total does not match cart total: ${_paypalTotal} !== ${_cartTotal}`); // prettier-ignore
     }
 
-    // ✅ Create Order object
+    // ✅ 5. Create Order object
     const order = {
       user: user.documentId,
       orderId: orderId,
-      paymentMethod: "paypal",
+      paymentMethod: paymentMethod,
       courses: cart.courses.map((course) => course.documentId),
       totalPrice: _paypalTotal,
       prices: cart.courses.map((course) => {
@@ -152,91 +196,55 @@ module.exports = {
       //
     };
 
-    // ✅ Create order object
-    let newOrder = await strapi.documents("api::order.order").create({
+    let newOrder: Order = await strapi.documents("api::order.order").create({
       populate: OrderPopulate,
       data: { ...order },
     });
 
-    // ✅ Capture PayPal order
-    const paypalCaptureData = await _capturePaypalOrder("POST", `${orderId}/capture`); // prettier-ignore
-    if (paypalCaptureData.status !== "COMPLETED") {
-      throw new ApplicationError(`PayPal order capture failed: ${paypalCaptureData.status}`); // prettier-ignore
+    // ✅ 6. Capture PayPal order
+    let paypalCaptureData;
+    if (paymentMethod == "paypal") {
+      paypalCaptureData = await _capturePaypalOrder("POST", `${orderId}/capture`); // prettier-ignore
+      if (paypalCaptureData.status !== "COMPLETED") throw new ApplicationError(`PayPal order capture failed: ${paypalCaptureData.status}`); // prettier-ignore
+
+      // ✅ Update order object
+      newOrder = await strapi.documents("api::order.order").update({
+        populate: OrderPopulate,
+        documentId: newOrder.documentId,
+        data: {
+          orderStatus: "paypal captured",
+          orderHistory: newOrder.orderHistory + ", paypal captured",
+        },
+      });
+
+      // ✅ 7. Update user's bought courses
+      const updatedCourses = [
+        ...new Set([...userCoursesIds, ...cartCoursesIds]),
+      ];
+      await strapi.documents("api::user-custom.user-custom").update({
+        documentId: user.documentId,
+        data: { courses: updatedCourses },
+      });
+
+      // ✅ Update order object
+      newOrder = await strapi.documents("api::order.order").update({
+        populate: OrderPopulate,
+        documentId: newOrder.documentId,
+        data: {
+          orderStatus: "courses added",
+          orderHistory: newOrder.orderHistory + ", coursesAdded",
+          courses: cartCoursesIds,
+        },
+      });
     }
 
-    // ✅ Update order object
-    newOrder = await strapi.documents("api::order.order").update({
-      populate: OrderPopulate,
-      documentId: newOrder.documentId,
-      data: {
-        orderStatus: "paypal captured",
-        orderHistory: newOrder.orderHistory + ", paypal captured",
-      },
-    });
-
-    // ✅ Update user's bought courses
-    const updatedCourses = [...new Set([...userCoursesIds, ...cartCoursesIds])];
-    await strapi.documents("api::user-custom.user-custom").update({
-      documentId: user.documentId,
-      data: { courses: updatedCourses },
-    });
-
-    // ✅ Update order object
-    newOrder = await strapi.documents("api::order.order").update({
-      populate: OrderPopulate,
-      documentId: newOrder.documentId,
-      data: {
-        orderStatus: "courses added",
-        orderHistory: newOrder.orderHistory + ", coursesAdded",
-        courses: cartCoursesIds,
-      },
-    });
-
-    // ✅ Clear cart
-    await strapi.documents("api::cart.cart").delete({
-      documentId: cart.documentId,
-    });
+    // ✅ 8. Clear cart
+    await strapi.documents("api::cart.cart").delete({documentId: cart.documentId}); // prettier-ignore
 
     debugger;
 
-    // ✅ Send user email
-    let to = user.email;
-    let subject = "Gracias por tu compra";
-    let templateName = "order-user";
-    //
-    let variables = {
-      baseUrl: BASE_URL,
-      imgBaseUrl: IMG_BASE_URL,
-      username: newOrder.user.username,
-      email: newOrder.user.email,
-      courses: newOrder.courses,
-      paymentMethod: newOrder.paymentMethod,
-      orderId: newOrder.orderId,
-      orderDate: new Date(newOrder.orderDate).toISOString().slice(0, 10),
-      totalPrice: newOrder.totalPrice + "",
-      myOrdersLink: `${BASE_URL}/profile`,
-    };
-    await sendEmail(to, subject, templateName, variables);
-
-    // ✅ send admin email
-    let to2 = EMAIL_ADMIN_RECEIVER;
-    let subject2 = "Nuevo Pedido";
-    let templateName2 = "order-admin";
-    let variables2 = {
-      baseUrl: BASE_URL,
-      imgBaseUrl: IMG_BASE_URL,
-      username: newOrder.user.username,
-      userEmail: newOrder.user.email,
-      userPhone: newOrder.user.phone,
-      userCountry: newOrder.user.country,
-      courses: newOrder.courses,
-      paymentMethod: newOrder.paymentMethod,
-      orderId: newOrder.orderId,
-      orderDate: new Date(newOrder.orderDate).toISOString().slice(0, 10),
-      totalPrice: newOrder.totalPrice + "",
-      myOrdersLink: `${BASE_URL}/profile`,
-    };
-    await sendEmail(to2, subject2, templateName2, variables2);
+    // ✅ 9. Send user email
+    await _sendOrderEmails(newOrder);
 
     return paypalCaptureData;
   },

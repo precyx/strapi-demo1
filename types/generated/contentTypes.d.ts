@@ -647,6 +647,38 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiPaymentSettingPaymentSetting
+  extends Struct.SingleTypeSchema {
+  collectionName: 'payment_settings';
+  info: {
+    displayName: 'PaymentSettings';
+    pluralName: 'payment-settings';
+    singularName: 'payment-setting';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    Bank: Schema.Attribute.String;
+    concept: Schema.Attribute.String;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    identityDocument: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::payment-setting.payment-setting'
+    > &
+      Schema.Attribute.Private;
+    phoneNumber: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiProductProduct extends Struct.CollectionTypeSchema {
   collectionName: 'products';
   info: {
@@ -1375,6 +1407,7 @@ declare module '@strapi/strapi' {
       'api::global.global': ApiGlobalGlobal;
       'api::ingredient.ingredient': ApiIngredientIngredient;
       'api::order.order': ApiOrderOrder;
+      'api::payment-setting.payment-setting': ApiPaymentSettingPaymentSetting;
       'api::product.product': ApiProductProduct;
       'api::user-custom.user-custom': ApiUserCustomUserCustom;
       'api::utensil.utensil': ApiUtensilUtensil;
