@@ -651,6 +651,7 @@ export interface ApiPaymentSettingPaymentSetting
   extends Struct.SingleTypeSchema {
   collectionName: 'payment_settings';
   info: {
+    description: '';
     displayName: 'PaymentSettings';
     pluralName: 'payment-settings';
     singularName: 'payment-setting';
@@ -659,11 +660,13 @@ export interface ApiPaymentSettingPaymentSetting
     draftAndPublish: true;
   };
   attributes: {
-    Bank: Schema.Attribute.String;
-    concept: Schema.Attribute.String;
+    bank: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    dailyExchangeRateVES: Schema.Attribute.Decimal;
+    dailyExchangeRateVESUpdatedAt: Schema.Attribute.DateTime;
+    dailyExchangeRateVESUpdatedAtExternal: Schema.Attribute.DateTime;
     identityDocument: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<

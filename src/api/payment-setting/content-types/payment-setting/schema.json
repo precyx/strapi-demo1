@@ -4,13 +4,14 @@
   "info": {
     "singularName": "payment-setting",
     "pluralName": "payment-settings",
-    "displayName": "PaymentSettings"
+    "displayName": "PaymentSettings",
+    "description": ""
   },
   "options": {
     "draftAndPublish": true
   },
   "attributes": {
-    "Bank": {
+    "bank": {
       "type": "string"
     },
     "phoneNumber": {
@@ -19,8 +20,14 @@
     "identityDocument": {
       "type": "string"
     },
-    "concept": {
-      "type": "string"
+    "dailyExchangeRateVES": {
+      "type": "decimal"
+    },
+    "dailyExchangeRateVESUpdatedAt": {
+      "type": "datetime"
+    },
+    "dailyExchangeRateVESUpdatedAtExternal": {
+      "type": "datetime"
     }
   }
 }

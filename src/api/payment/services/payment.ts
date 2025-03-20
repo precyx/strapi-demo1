@@ -14,6 +14,8 @@ const BASE_URL = process.env.CORS_ORIGIN;
 const IMG_BASE_URL = process.env.CORS_ORIGIN_LIVE;
 const EMAIL_ADMIN_RECEIVER = process.env.EMAIL_ADMIN_RECEIVER;
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 const OrderPopulate = {
   courses: {
     populate: {
@@ -247,5 +249,75 @@ module.exports = {
     await _sendOrderEmails(newOrder);
 
     return paypalCaptureData;
+  },
+
+  /**
+   * Pagomovil Bank Info
+   */
+  async pagomovilBankInfo(user: User) {
+    debugger;
+
+    if (!user) throw new UnauthorizedError("You are not logged in.");
+
+    // ✅ 1. get payment settings
+    let bankInfo;
+    bankInfo = await strapi.documents("api::payment-setting.payment-setting").findFirst(); // prettier-ignore
+    if(!bankInfo) throw new ApplicationError("No bank info found."); // prettier-ignore
+
+    // ✅ 2. get cart total
+    let cart = await strapi.documents("api::cart.cart").findFirst({
+      filters: { user: { documentId: user.documentId } },
+      populate: "*",
+    });
+    if (!cart?.courses?.length) throw new ApplicationError("Cart not found for this user."); // prettier-ignore
+    let _cartTotal = cart.courses.reduce((sum, course) => sum + course.price, 0); // prettier-ignore
+
+    // ✅ 3. update exchange rate if needed
+    const lastUpdated = new Date(bankInfo.dailyExchangeRateVESUpdatedAt);
+    const isInvalidDate = isNaN(lastUpdated.getTime());
+    const oneDayAgo = new Date();
+    oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+
+    if (isInvalidDate || lastUpdated < oneDayAgo) {
+      let CURRENCY_API = `https://api.currencyapi.com/v3/latest?apikey=${process.env.CURRENCY_API_KEY}&currencies=VES`;
+      let response;
+      response = await axios.get(CURRENCY_API);
+
+      if (!response?.data?.data?.VES?.value) {
+        await sleep(1000);
+        response = await axios.get(CURRENCY_API);
+      }
+      if (!response?.data?.data?.VES?.value) {
+        await sleep(2000);
+        response = await axios.get(CURRENCY_API);
+      }
+      if (!response?.data?.data?.VES?.value) {
+        throw new ApplicationError("Error getting the exchange rate");
+      }
+
+      // get the exchange rate
+      let _exchangeRate = response.data.data.VES.value;
+      let _updatedAt = response.data.meta.last_updated_at;
+
+      // update bank info
+      bankInfo = await strapi
+        .documents("api::payment-setting.payment-setting")
+        .update({
+          documentId: bankInfo.documentId,
+          data: {
+            dailyExchangeRateVES: _exchangeRate,
+            dailyExchangeRateVESUpdatedAtExternal: _updatedAt,
+            dailyExchangeRateVESUpdatedAt: new Date(),
+          },
+        });
+    }
+
+    // ✅ 4. calculate mount to pay
+    let _amountToPay = (_cartTotal * parseFloat(bankInfo.dailyExchangeRateVES)).toFixed(2); // prettier-ignore
+
+    return {
+      ...bankInfo,
+      amountToPay: _amountToPay,
+    };
   },
 };

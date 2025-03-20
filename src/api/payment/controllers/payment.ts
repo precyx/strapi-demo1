@@ -27,4 +27,15 @@ module.exports = {
       return (ctx as any).badRequest(err.message, err.details);
     }
   },
+
+  async pagomovilBankInfo(ctx: Context) {
+    let user = ctx.state.user;
+    try {
+      const bankInfo = await strapi.service("api::payment.payment").pagomovilBankInfo(user); // prettier-ignore
+      ctx.send(bankInfo);
+    } catch (err) {
+      console.log("❌ PAGOMOVIL BANK INFO: ", err);
+      return (ctx as any).badRequest(err.message, err.details);
+    }
+  },
 };

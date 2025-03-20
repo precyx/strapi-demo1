@@ -18,5 +18,14 @@ module.exports = {
         middlewares: ["global::jwtAuth"],
       },
     },
+    {
+      method: "GET",
+      path: "/payment/pagomovil-bank-info",
+      handler: "payment.pagomovilBankInfo",
+      config: {
+        policies: [],
+        middlewares: ["global::jwtAuth"],
+      },
+    },
   ],
 };
