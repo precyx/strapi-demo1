@@ -22,6 +22,7 @@ const OrderPopulate = {
       videoPreview: true,
     },
   },
+  paymentDetails: true,
   user: true,
 };
 
@@ -144,11 +145,20 @@ module.exports = {
   /**
    * Capture Order
    */
-  async captureOrder(user: User, orderId: string, paymentMethod: string) {
+  async captureOrder(user: User, paymentMethod: string, paymentDetails: any) {
     debugger;
+    // ✅ 0. validate data
     if (!user) throw new UnauthorizedError("You are not logged in.");
-    if (!orderId) throw new ApplicationError("Order ID is required.");
     if (!["paypal", "pagomovil"].includes(paymentMethod)) throw new ApplicationError("No recognized Payment Method."); // prettier-ignore
+    if (paymentMethod == "paypal") {
+      if (!paymentDetails.orderId)
+        throw new ApplicationError("Paypal Order ID is required.");
+    } else if (paymentMethod == "pagomovil") {
+      if (!paymentDetails.bankReference)
+        throw new ApplicationError("Bank Reference is required.");
+      if (!paymentDetails.senderPhone)
+        throw new ApplicationError("Sender Phone is required.");
+    }
 
     // ✅ 1. get cart
     let cart = await strapi.documents("api::cart.cart").findFirst({
@@ -168,7 +178,7 @@ module.exports = {
 
     // ✅ 3. If PayPal, get the order details
     let paypalOrder;
-    if (paymentMethod == "paypal") paypalOrder = await _capturePaypalOrder("GET", orderId); // prettier-ignore
+    if (paymentMethod == "paypal") paypalOrder = await _capturePaypalOrder("GET", paymentDetails.orderId); // prettier-ignore
 
     // ✅ 4. Check if paypal total matches the cart total
     let _cartTotal = cart.courses.reduce((sum, course) => sum + course.price, 0); // prettier-ignore
@@ -179,11 +189,10 @@ module.exports = {
     }
 
     // ✅ 5. Create Order object
-    const order = {
+    let order = {
       user: user.documentId,
-      orderId: orderId,
       paymentMethod: paymentMethod,
-      paymentStatus: "pending",
+      paymentStatus: "verifying",
       courses: cart.courses.map((course) => course.documentId),
       totalPrice: _paypalTotal,
       prices: cart.courses.map((course) => {
@@ -196,7 +205,12 @@ module.exports = {
       orderDate: new Date(),
       orderStatus: "created",
       orderHistory: "created",
-      //
+      paymentDetails: [
+        {
+          __component: `payment-option.${paymentMethod}`,
+          ...paymentDetails,
+        },
+      ],
     };
 
     let newOrder: Order = await strapi.documents("api::order.order").create({
@@ -207,7 +221,7 @@ module.exports = {
     // ✅ 6. Capture PayPal order
     let paypalCaptureData;
     if (paymentMethod == "paypal") {
-      paypalCaptureData = await _capturePaypalOrder("POST", `${orderId}/capture`); // prettier-ignore
+      paypalCaptureData = await _capturePaypalOrder("POST", `${paymentDetails.orderId}/capture`); // prettier-ignore
       if (paypalCaptureData.status !== "COMPLETED") throw new ApplicationError(`PayPal order capture failed: ${paypalCaptureData.status}`); // prettier-ignore
 
       // ✅ Update order object

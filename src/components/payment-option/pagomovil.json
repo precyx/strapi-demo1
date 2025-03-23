@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_payment_option_pagomovils",
+  "info": {
+    "displayName": "pagomovil",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "senderPhone": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "string"
+    },
+    "bankReference": {
+      "type": "string"
+    }
+  }
+}

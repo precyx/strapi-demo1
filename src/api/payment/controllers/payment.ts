@@ -17,10 +17,10 @@ module.exports = {
 
   async captureOrder(ctx: Context) {
     let user = ctx.state.user;
-    const { orderId, paymentMethod } = ctx.request.body;
+    const { paymentMethod, paymentDetails } = ctx.request.body;
 
     try {
-      const capture = await strapi.service("api::payment.payment").captureOrder(user, orderId, paymentMethod); // prettier-ignore
+      const capture = await strapi.service("api::payment.payment").captureOrder(user, paymentMethod, paymentDetails); // prettier-ignore
       ctx.send(capture);
     } catch (err) {
       console.log("❌ CAPTURE ORDER: ", err);

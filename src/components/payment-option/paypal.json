@@ -1,0 +1,12 @@
+{
+  "collectionName": "components_payment_option_paypals",
+  "info": {
+    "displayName": "paypal"
+  },
+  "options": {},
+  "attributes": {
+    "orderId": {
+      "type": "string"
+    }
+  }
+}
