@@ -87,8 +87,10 @@ const sendEmail = async (
 
     if (EMAIL_MODE === "production") {
       await sendEmailMailGun(FROM, to, subject, htmlContent);
-    } else {
+    } else if (EMAIL_MODE === "test") {
       await sendEmailNodemailer(FROM, to, subject, htmlContent);
+    } else if (EMAIL_MODE === "disabled") {
+      console.log("Email sending is disabled");
     }
   } catch (error) {
     console.error("❌ Email Sending Failed:", error.message);
