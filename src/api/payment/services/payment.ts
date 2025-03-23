@@ -248,7 +248,7 @@ module.exports = {
     // ✅ 9. Send user email
     await _sendOrderEmails(newOrder);
 
-    return paypalCaptureData;
+    return newOrder;
   },
 
   /**

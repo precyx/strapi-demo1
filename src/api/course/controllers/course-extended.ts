@@ -7,7 +7,7 @@ export default factories.createCoreController(
   "api::course.course",
   ({ strapi }) => ({
     /**
-     * Register User
+     * Get My Courses
      */
     // Custom controller method to fetch courses by userId
     async myCourses(ctx: Context) {

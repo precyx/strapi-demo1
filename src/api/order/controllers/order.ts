@@ -13,9 +13,9 @@ export default factories.createCoreController(
   "api::order.order",
   ({ strapi }) => ({
     /**
-     * Get
+     * Get All By User
      */
-    async get(ctx) {
+    async getAllByUser(ctx) {
       try {
         // ✅ check if user is logged in
         if (!ctx.state.user) return ctx.unauthorized("You are not logged in."); // prettier-ignore
@@ -29,7 +29,35 @@ export default factories.createCoreController(
 
         ctx.send(orders);
       } catch (err) {
-        console.log("❌ ORDERS GET: ", err);
+        console.log("❌ ORDERS GET ALL BY USER: ", err);
+        return (ctx as any).badRequest(err.message, err.details);
+      }
+    },
+
+    /**
+     * Get By User
+     */
+    async getByUser(ctx) {
+      try {
+        const { orderId } = ctx.params;
+
+        // ✅ check if user is logged in
+        if (!ctx.state.user) return ctx.unauthorized("You are not logged in."); // prettier-ignore
+        let user = ctx.state.user;
+
+        // ✅ get order
+        const order = await strapi.documents("api::order.order").findOne({
+          documentId: orderId,
+          populate: "*",
+        });
+
+        // ✅ check if order is by user
+        if (!order || order.user.documentId !== user.documentId) {
+          return ctx.unauthorized("You are not authorized to view this order.");
+        }
+        ctx.send(order);
+      } catch (err) {
+        console.log("❌ ORDERS GET BY USER: ", err);
         return (ctx as any).badRequest(err.message, err.details);
       }
     },
