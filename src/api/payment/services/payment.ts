@@ -183,6 +183,7 @@ module.exports = {
       user: user.documentId,
       orderId: orderId,
       paymentMethod: paymentMethod,
+      paymentStatus: "pending",
       courses: cart.courses.map((course) => course.documentId),
       totalPrice: _paypalTotal,
       prices: cart.courses.map((course) => {
@@ -214,6 +215,7 @@ module.exports = {
         populate: OrderPopulate,
         documentId: newOrder.documentId,
         data: {
+          paymentStatus: "paid",
           orderStatus: "paypal captured",
           orderHistory: newOrder.orderHistory + ", paypal captured",
         },

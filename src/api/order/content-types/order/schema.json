@@ -42,6 +42,9 @@
     },
     "orderHistory": {
       "type": "string"
+    },
+    "paymentStatus": {
+      "type": "string"
     }
   }
 }
