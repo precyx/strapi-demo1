@@ -28,10 +28,10 @@ module.exports = {
     }
   },
 
-  async pagomovilBankInfo(ctx: Context) {
+  async getPagomovilBankInfo(ctx: Context) {
     let user = ctx.state.user;
     try {
-      const bankInfo = await strapi.service("api::payment.payment").pagomovilBankInfo(user); // prettier-ignore
+      const bankInfo = await strapi.service("api::payment.payment").getPagomovilBankInfo(user); // prettier-ignore
       ctx.send(bankInfo);
     } catch (err) {
       console.log("❌ PAGOMOVIL BANK INFO: ", err);

@@ -21,7 +21,7 @@ module.exports = {
     {
       method: "GET",
       path: "/payment/pagomovil-bank-info",
-      handler: "payment.pagomovilBankInfo",
+      handler: "payment.getPagomovilBankInfo",
       config: {
         policies: [],
         middlewares: ["global::jwtAuth"],

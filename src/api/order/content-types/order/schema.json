@@ -46,12 +46,6 @@
     "paymentStatus": {
       "type": "string"
     },
-    "paypalData": {
-      "type": "json"
-    },
-    "pagomovilData": {
-      "type": "json"
-    },
     "paymentDetails": {
       "type": "dynamiczone",
       "components": [
