@@ -60,7 +60,9 @@ export default factories.createCoreController(
         console.log("❌ ME USER: ", "You are not logged in.");
         return ctx.unauthorized("You are not logged in.");
       }
-      return ctx.send(ctx.state.user);
+      // remove 'password'
+      const { password, ...rest } = ctx.state.user;
+      return ctx.send(rest);
     },
 
     /**
