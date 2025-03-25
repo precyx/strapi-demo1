@@ -118,7 +118,76 @@ const _sendOrderEmails = async (order: Order) => {
 
 module.exports = {
   /**
-   * Create Order
+   * Create Binance Order
+   */
+  async createBinanceOrder() {
+    /*
+    const orderId = `ORDER_${Date.now()}`;
+    const payload = {
+      env: { terminalType: 'WEB' },
+      merchantTradeNo: orderId,
+      orderAmount: 10.0,
+      currency: 'USDT',
+      goods: {
+        goodsType: '01',
+        goodsCategory: 'D000',
+        referenceGoodsId: courseId,
+        goodsName: 'Course Purchase'
+      }
+    };
+    */
+    // ✅ 1. Create binance order
+    /*
+    const response = await axios.post(
+      'https://bpay.binanceapi.com/binancepay/openapi/v2/order',
+      payload,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'BinancePay-Timestamp': timestamp,
+          'BinancePay-Nonce': nonce,
+          'BinancePay-Signature': signature,
+          'BinancePay-Certificate-SN': process.env.BINANCE_API_KEY!
+        }
+      }
+    );
+    */
+    //const { codeUrl } = response.data.data;
+    // ✅ 2. Create Order object
+    /*
+    let order = {
+      user: user.documentId,
+      paymentMethod: "binance",
+      paymentStatus: "verifying",
+      courses: cart.courses.map((course) => course.documentId),
+      totalPrice: _paypalTotal,
+      prices: cart.courses.map((course) => {
+        return {
+          price: course.price,
+          documentId: course.documentId,
+        };
+      }),
+      //
+      orderDate: new Date(),
+      orderStatus: "created",
+      orderHistory: "created",
+      paymentDetails: [
+        {
+          __component: `payment-option.${paymentMethod}`,
+          ...paymentDetails,
+        }
+      ]
+    };
+    */
+  },
+
+  /**
+   * Webhook Binance
+   */
+  async binanceWebhook() {},
+
+  /**
+   * Create Paypal Order
    */
   async createOrder(courseIds: string[]) {
     if (!courseIds?.length) throw new ApplicationError("No course IDs provided."); // prettier-ignore
@@ -143,7 +212,7 @@ module.exports = {
   },
 
   /**
-   * Capture Order
+   * Capture Order [Paypal, Pagomovil]
    */
   async captureOrder(user: User, paymentMethod: string, paymentDetails: any) {
     debugger;
@@ -218,12 +287,14 @@ module.exports = {
       data: { ...order },
     });
 
-    // ✅ 6. Capture PayPal order
+    // ✅ 6. Handle PayPal order
     let paypalCaptureData;
     if (paymentMethod == "paypal") {
       paypalCaptureData = await _capturePaypalOrder("POST", `${paymentDetails.orderId}/capture`); // prettier-ignore
       if (paypalCaptureData.status !== "COMPLETED") throw new ApplicationError(`PayPal order capture failed: ${paypalCaptureData.status}`); // prettier-ignore
+    }
 
+    if (paymentMethod == "paypal") {
       // ✅ Update order object
       newOrder = await strapi.documents("api::order.order").update({
         populate: OrderPopulate,
@@ -268,9 +339,9 @@ module.exports = {
   },
 
   /**
-   * Pagomovil Bank Info
+   * Get Pagomovil Bank Info
    */
-  async pagomovilBankInfo(user: User) {
+  async getPagomovilBankInfo(user: User) {
     debugger;
 
     if (!user) throw new UnauthorizedError("You are not logged in.");

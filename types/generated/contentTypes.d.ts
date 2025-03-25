@@ -633,13 +633,11 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
     orderHistory: Schema.Attribute.String;
     orderId: Schema.Attribute.String;
     orderStatus: Schema.Attribute.String;
-    pagomovilData: Schema.Attribute.JSON;
     paymentDetails: Schema.Attribute.DynamicZone<
       ['payment-option.pagomovil', 'payment-option.paypal']
     >;
     paymentMethod: Schema.Attribute.String;
     paymentStatus: Schema.Attribute.String;
-    paypalData: Schema.Attribute.JSON;
     prices: Schema.Attribute.JSON;
     publishedAt: Schema.Attribute.DateTime;
     totalPrice: Schema.Attribute.Decimal;
