@@ -9,6 +9,7 @@ export interface PaymentOptionPagomovil extends Struct.ComponentSchema {
   attributes: {
     amount: Schema.Attribute.String;
     bankReference: Schema.Attribute.String;
+    dailyExchangeRateVES: Schema.Attribute.String;
     senderPhone: Schema.Attribute.String;
   };
 }

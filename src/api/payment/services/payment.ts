@@ -383,6 +383,7 @@ const captureOrderPagomovil = async (user: User, paymentDetails: any) => {
         __component: `payment-option.${PAYMENT_METHOD}`,
         ...paymentDetails,
         amount: pagomovilBankInfo.amount,
+        dailyExchangeRateVES: pagomovilBankInfo.dailyExchangeRateVES + "",
       },
     ],
   };

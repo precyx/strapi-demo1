@@ -59,17 +59,23 @@
                   <td colspan="2" style="padding-bottom:10px;"><b>Información de Pagomóvil:</b></td>
                 </tr>
                 <tr>
-                  <td width="50%" style="color:#a6a6a6; padding-right:5px;">Referencia Bancaria:</td>
-                  <td width="50%">{{paymentDetails.bankReference}}</td>
-                </tr>
-                <tr>
                   <td width="50%" style="color:#a6a6a6; padding-right:5px;">Móvil del Pagador:</td>
                   <td width="50%">{{paymentDetails.senderPhone}}</td>
+                </tr>
+                <tr>
+                  <td width="50%" style="color:#a6a6a6; padding-right:5px;">Referencia Bancaria:</td>
+                  <td width="50%">{{paymentDetails.bankReference}}</td>
                 </tr>
                 <tr>
                   <td width="50%" style="color:#a6a6a6; padding-right:5px;">Monto:</td>
                   <td width="50%">{{paymentDetails.amount}} VES</td>
                 </tr>
+                <tr>
+                  <td width="50%" style="color:#a6a6a6; padding-right:5px;">Cambio:</td>
+                  <td width="50%">{{paymentDetails.dailyExchangeRateVES}} VES/USD</td>
+                </tr>
+
+                
               </table>
               {{else}}
                 <div></div>
