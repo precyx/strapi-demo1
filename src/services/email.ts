@@ -9,6 +9,19 @@ const { ApplicationError, UnauthorizedError } = errors;
 const EMAIL_MODE = process.env.EMAIL_MODE;
 
 /**
+ * Register Handlebars Helper
+ */
+type HandlebarsOptions = {
+  fn: (context: any) => string;
+  inverse: (context: any) => string;
+};
+// prettier-ignore
+function ifEquals(this: any, arg1: any, arg2: any, options: HandlebarsOptions): string { 
+  return arg1 === arg2 ? options.fn(this) : options.inverse(this);
+}
+Handlebars.registerHelper("ifEquals", ifEquals);
+
+/**
  * Mail Gun
  */
 // prettier-ignore

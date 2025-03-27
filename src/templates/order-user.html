@@ -19,10 +19,11 @@
     /* Additional styles */
     .order-item { display: table; width: 100%; padding: 15px 0; border-bottom: 1px solid rgba(39, 147, 206, 0.13); }
     .order-image { width: 20%; display: table-cell; text-align: center; }
-    .order-text { width: 70%; display: table-cell; font-size: 14px; color: #2793CE; font-weight: bold; padding-left: 15px; vertical-align: top; }
-    .order-price { width: 10%; display: table-cell; text-align: right; font-size: 14px; color: #8FC04B; vertical-align: top; }
-    .order-total { font-size: 18px; font-weight: bold; color: #75B8DC; font-style: italic; }
-    .payment-method { font-size: 14px; color: #50595F; line-height:140%; border-bottom: 1px solid rgba(39, 147, 206, 0.13); padding-bottom: 10px; margin-top: 15px; }
+    .order-text { width: 70%; display: table-cell; font-size: 14px; color: #9ca6b2; font-weight: normal; padding-left: 15px; vertical-align: top; }
+    .order-price { width: 10%; display: table-cell; text-align: right; font-size: 14px; color: #8FC04B; vertical-align: top; padding-left:5px;}
+    .order-title { font-size: 18px; font-weight: bold; color: #75B8DC; font-style: italic; margin-top:15px; margin-bottom:10px; }
+    .payment-method { font-size: 14px; color: #50595F; line-height:140%; border-bottom: 1px solid rgba(39, 147, 206, 0.13); padding-bottom: 10px; margin-top: 10px; }
+    .payment-id { font-size: 14px; color: #50595F; line-height:140%; border-bottom: 1px solid rgba(39, 147, 206, 0.13); padding-bottom: 10px; margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -35,12 +36,12 @@
           <tr>
             <td class="email-section" style="padding: 30px;">
               <a href="{{baseUrl}}" target="_blank">
-                <img src="{{imgBaseUrl}}/img/email/logo-color.png" alt="Snaiders Clean Logo" height="60" style="margin: 0 auto;">
+                <img src="{{imgBaseUrl}}/img/email/logo-color.png" alt="Snaiders Clean Logo" height="55" style="margin: 0 auto;">
               </a>
-              <p style="color: #50595F; font-size: 24px; font-weight: bold; margin-top: 30px;">¡Gracias por tu compra {{username}}!</p>
-              <p style="color: #50595F; font-size: 14px; line-height: 1.5;">Gracias por tu compra en Snaiders Clean! Tu pedido ha sido recibido con éxito.</p>
-              <p class="order-total">Pedido {{orderId}} de {{orderDate}}</p>
-              <p style="font-size: 14px; color: #50595F; border-bottom: 1px solid rgba(39, 147, 206, 0.13); padding-bottom:10px; margin-bottom:0;">Total: <span style="color: #8FC04B">${{totalPrice}}</span></p>
+              <div style="color: #50595F; font-size: 24px; font-weight: bold; margin-top: 30px; margin-bottom:15px;">¡Gracias por tu compra {{username}}!</div>
+              <div style="color: #50595F; font-size: 14px; line-height: 1.5;">Gracias por tu compra en Snaiders Clean! Tu pedido ha sido recibido con éxito.</div>
+              <div class="order-title">Pedido de {{orderDate}}</div>
+              <div style="font-size: 14px; color: #50595F; border-bottom: 1px solid rgba(39, 147, 206, 0.13); padding-bottom:10px; margin-bottom:0;">Total: <span style="color: #8FC04B">${{totalPrice}}</span></div>
 
               <!-- Order items loop -->
               {{#each courses}}
@@ -54,11 +55,16 @@
               {{/each}}
 
               <!-- Payment method -->
-              <p class="payment-method">
-                <b>Forma de Pago</b>
+              <div class="payment-method">
+                <b>Forma de Pago:</b>
                 <br>
                 {{paymentMethod}}
-              </p>
+              </div>
+              <div class="payment-id">
+                <b>ID de Compra:</b>
+                <br>
+                {{orderId}}
+              </div>
 
               <a href="{{myOrdersLink}}" class="button button-fallback" style="background: linear-gradient(to right, #8FC04B, #2695C7); color: #ffffff; text-decoration: none; font-size: 16px; padding: 8px 25px; display: inline-block; margin-top: 15px; border-radius: 40px; font-style: italic;">Ver mis Pedidos</a>
             </td>
