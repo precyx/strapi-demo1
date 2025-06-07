@@ -894,6 +894,7 @@ export interface ApiVideoVideo extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
+    videoLink: Schema.Attribute.String;
   };
 }
 
