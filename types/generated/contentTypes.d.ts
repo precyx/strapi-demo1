@@ -753,6 +753,36 @@ export interface ApiProductProduct extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiTestimonialTestimonial extends Struct.CollectionTypeSchema {
+  collectionName: 'testimonials';
+  info: {
+    displayName: 'Testimonial';
+    pluralName: 'testimonials';
+    singularName: 'testimonial';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    image: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::testimonial.testimonial'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    text: Schema.Attribute.Text;
+    title: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiUserCustomUserCustom extends Struct.CollectionTypeSchema {
   collectionName: 'user_customs';
   info: {
@@ -1417,6 +1447,7 @@ declare module '@strapi/strapi' {
       'api::order.order': ApiOrderOrder;
       'api::payment-setting.payment-setting': ApiPaymentSettingPaymentSetting;
       'api::product.product': ApiProductProduct;
+      'api::testimonial.testimonial': ApiTestimonialTestimonial;
       'api::user-custom.user-custom': ApiUserCustomUserCustom;
       'api::utensil.utensil': ApiUtensilUtensil;
       'api::video.video': ApiVideoVideo;

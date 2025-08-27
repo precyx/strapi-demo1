@@ -1,61 +1,100 @@
-# 🚀 Getting started with Strapi
+# ⚙️ Strapi Environment Configuration
 
-Strapi comes with a full featured [Command Line Interface](https://docs.strapi.io/dev-docs/cli) (CLI) which lets you scaffold and manage your project in seconds.
 
-### `develop`
+## 🌍 Environments
 
-Start your Strapi application with autoReload enabled. [Learn more](https://docs.strapi.io/dev-docs/cli#strapi-develop)
+### 🔧 Local
+- Environment file: `.env` (or `.env.local`)
+- Purpose: Development on your local machine.
 
-```
-npm run develop
-# or
-yarn develop
-```
-
-### `start`
-
-Start your Strapi application with autoReload disabled. [Learn more](https://docs.strapi.io/dev-docs/cli#strapi-start)
-
-```
-npm run start
-# or
-yarn start
-```
-
-### `build`
-
-Build your admin panel. [Learn more](https://docs.strapi.io/dev-docs/cli#strapi-build)
-
-```
-npm run build
-# or
-yarn build
-```
-
-## ⚙️ Deployment
-
-Strapi gives you many possible deployment options for your project including [Strapi Cloud](https://cloud.strapi.io). Browse the [deployment section of the documentation](https://docs.strapi.io/dev-docs/deployment) to find the best solution for your use case.
-
-```
-yarn strapi deploy
-```
-
-## 📚 Learn more
-
-- [Resource center](https://strapi.io/resource-center) - Strapi resource center.
-- [Strapi documentation](https://docs.strapi.io) - Official Strapi documentation.
-- [Strapi tutorials](https://strapi.io/tutorials) - List of tutorials made by the core team and the community.
-- [Strapi blog](https://strapi.io/blog) - Official Strapi blog containing articles made by the Strapi team and the community.
-- [Changelog](https://strapi.io/changelog) - Find out about the Strapi product updates, new features and general improvements.
-
-Feel free to check out the [Strapi GitHub repository](https://github.com/strapi/strapi). Your feedback and contributions are welcome!
-
-## ✨ Community
-
-- [Discord](https://discord.strapi.io) - Come chat with the Strapi community including the core team.
-- [Forum](https://forum.strapi.io/) - Place to discuss, ask questions and find answers, show your Strapi project and get feedback or just talk with other Community members.
-- [Awesome Strapi](https://github.com/strapi/awesome-strapi) - A curated list of awesome things related to Strapi.
+### 🚢 Production
+- Environment file: `.env.production`
+- Purpose: Deployed environment (e.g., Railway).
 
 ---
 
-<sub>🤫 Psst! [Strapi is hiring](https://strapi.io/careers).</sub>
+## 🔑 Environment Variables
+
+Below is a breakdown of all environment variables grouped by category.
+
+---
+
+### 🗄️ Database Configuration
+
+| Variable | Example | Description |
+|----------|---------|-------------|
+| `DATABASE_CLIENT` | `postgres` | Database client type (Postgres, MySQL, SQLite, etc.). |
+| `DATABASE_HOST` | `127.0.0.1` | Database server host. |
+| `DATABASE_PORT` | `5432` | Port for the database connection. |
+| `DATABASE_NAME` | `mydb` | Name of the database to connect to. |
+| `DATABASE_USERNAME` | `user123` | Username for the database connection. |
+| `DATABASE_PASSWORD` | `password123` | Password for the database connection. |
+| `DATABASE_SSL` | `false` | Enables SSL if required by your DB host (e.g., Railway/Heroku often require `true`). |
+| `DATABASE_FILENAME` | `data.db` | Used only for SQLite (path to DB file). |
+| `DATABASE_URL` | `postgres://user:pass@host:5432/dbname` | Complete connection string (overrides above values in production). |
+
+---
+
+### 🔐 Security & Authentication
+
+| Variable | Example | Description |
+|----------|---------|-------------|
+| `ADMIN_JWT_SECRET` | `randomSecret` | Secret key used for signing JWT tokens in the Strapi Admin panel. |
+| `API_TOKEN_SALT` | `randomSalt` | Salt used when generating API tokens. |
+| `APP_KEYS` | `key1,key2,key3` | Array of keys used for signing cookies and sessions. Multiple keys allow rotation. |
+| `JWT_SECRET` | `superSecret` | Secret key used for signing JWT tokens for the public API. |
+| `TRANSFER_TOKEN_SALT` | `randomSalt` | Salt used when creating transfer tokens (Strapi’s internal security feature). |
+| `STRAPI_API_TOKEN` | `token123` | API token for accessing Strapi APIs programmatically. |
+
+---
+
+### 🌐 Server & CORS
+
+| Variable | Example | Description |
+|----------|---------|-------------|
+| `HOST` | `0.0.0.0` | Defines which network interfaces the app binds to. Use `0.0.0.0` for all. |
+| `CORS_ORIGIN` | `https://myfrontend.com` | Allowed origin(s) for frontend requests. Prevents cross-site request issues. |
+
+---
+
+### 💳 Payments (PayPal Integration)
+
+| Variable | Example | Description |
+|----------|---------|-------------|
+| `PAYPAL_API` | `https://api-m.sandbox.paypal.com` | Base URL for PayPal API (sandbox or live). |
+| `PAYPAL_CLIENT_ID` | `abc123` | Client ID for your PayPal app. |
+| `PAYPAL_CLIENT_SECRET` | `secret123` | Client secret for your PayPal app. |
+| `PAYPAL_MODE` | `sandbox` / `live` | Defines whether the integration uses the testing environment or live payments. |
+
+---
+
+### ☁️ Cloudflare R2 Storage
+
+| Variable | Example | Description |
+|----------|---------|-------------|
+| `R2_ACCESS_KEY` | `abc123` | Access key for Cloudflare R2 storage. |
+| `R2_SECRET_KEY` | `secretKey123` | Secret key for Cloudflare R2. |
+| `R2_BUCKET` | `my-bucket` | Name of the R2 storage bucket. |
+| `R2_ENDPOINT` | `https://<accountid>.r2.cloudflarestorage.com` | Endpoint for accessing your R2 bucket. |
+| `R2_PUBLIC_ACCESS_URL` | `https://cdn.mysite.com` | Public-facing URL for serving uploaded assets. |
+
+---
+
+### 💱 External APIs
+
+| Variable | Example | Description |
+|----------|---------|-------------|
+| `CURRENCY_API_KEY` | `key123` | API key for currency conversion service (used if app requires exchange rates). |
+
+---
+
+## 🛠️ Technology Stack
+
+- **Strapi** – Headless CMS and backend framework  
+- **PostgreSQL** – Database  
+- **Railway** – Backend hosting & deployment  
+- **Cloudflare R2** – Media and file storage  
+- **PayPal API** – Payment integration  
+- **Node.js (LTS)** – Runtime environment 
+
+
